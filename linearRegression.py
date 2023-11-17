@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn import linear_model
+from tools import *
 
 # Sklearn
 from sklearn.linear_model import LinearRegression
@@ -30,13 +30,9 @@ features = ["MolWt", "NumValenceElectrons", "MaxPartialCharge"]
 model = LinearRegression()
 model.fit(newTrain[features], newTrain[target])
 
-# Predicting data
+# Predicting and saving data
 predicted = model.predict(newTest[features])
-
-# Formatting results for submission
-submission = pd.DataFrame({'ID': range(1, len(predicted)+1) , 'RT': predicted})
-submission.to_csv("Submissions/LinearRegressionTest.csv", index=False)
-
+saveSubmission(predicted)
 
 
 # Testing the fit by plotting predictions on the training data
