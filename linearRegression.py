@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from tools import *
+from tools import saveSubmission
 
 # Sklearn
 from sklearn.linear_model import LinearRegression
@@ -11,14 +11,14 @@ from sklearn.linear_model import LinearRegression
 # Import the data
 train = pd.read_csv("Data/train.csv")
 test = pd.read_csv("Data/test.csv")
-properties = pd.read_csv("Features/properties.csv")
-test_properties = pd.read_csv("tpropewewew.csv")
+train_properties = pd.read_csv("Features/train_properties.csv")
+test_properties = pd.read_csv("Features/test_properties.csv")
 
 target = "RT"
 
 # Merging training data and computed features
 LightTrain = train[["Compound", "SMILES", "Lab", "RT"]]
-LightProp = properties[["MolWt", "NumValenceElectrons", "MaxPartialCharge", "HeavyAtomCount", "RingCount", "MolLogP", "MolMR"]]
+LightProp = train_properties[["MolWt", "NumValenceElectrons", "MaxPartialCharge", "HeavyAtomCount", "RingCount", "MolLogP", "MolMR"]]
 newTrain = pd.concat([LightTrain, LightProp], axis=1)
 
 LightTest = test[["Compound", "SMILES", "Lab"]]
@@ -32,7 +32,7 @@ model.fit(newTrain[features], newTrain[target])
 
 # Predicting and saving data
 predicted = model.predict(newTest[features])
-saveSubmission(predicted)
+saveSubmission(predicted, "LinearRegression")
 
 
 # Testing the fit by plotting predictions on the training data
