@@ -26,7 +26,6 @@ plt.tight_layout()
 plt.savefig('Visualization_data/Lab_counts.png')
 
 
-
 # analysis of the Retention time 
 plt.figure(figsize=(10, 6))
 retention_times = df['RT']
