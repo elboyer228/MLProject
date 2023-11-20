@@ -15,24 +15,24 @@ train_properties = pd.read_csv("Features/train_properties.csv")
 test_properties = pd.read_csv("Features/test_properties.csv")
 
 target = "RT"
+features = ["MolLogP", "BertzCT", "NumAliphaticHeterocycles"]
 
 # Merging training data and computed features
 LightTrain = train[["Compound", "SMILES", "Lab", "RT"]]
-LightProp = train_properties[["MolWt", "NumValenceElectrons", "MaxPartialCharge", "HeavyAtomCount", "RingCount", "MolLogP", "MolMR"]]
+LightProp = train_properties[features]
 newTrain = pd.concat([LightTrain, LightProp], axis=1)
 
 LightTest = test[["Compound", "SMILES", "Lab"]]
-LightTProp = test_properties[["MolWt", "NumValenceElectrons", "MaxPartialCharge", "HeavyAtomCount", "RingCount", "MolLogP", "MolMR"]]
+LightTProp = test_properties[features]
 newTest = pd.concat([LightTest, LightTProp], axis=1)
 
 # Defining model
-features = ["MolWt", "NumValenceElectrons", "MaxPartialCharge"]
 model = LinearRegression()
 model.fit(newTrain[features], newTrain[target])
 
 # Predicting and saving data
 predicted = model.predict(newTest[features])
-saveSubmission(predicted, "LinearRegression")
+saveSubmission(predicted, "TargetLinearRegression")
 
 
 # Testing the fit by plotting predictions on the training data
