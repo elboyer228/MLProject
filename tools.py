@@ -40,7 +40,3 @@ def saveSubmission(predicted, name = "output"):
     """
     submission = pd.DataFrame({'ID': range(1, len(predicted)+1) , 'RT': predicted})
     submission.to_csv("Submissions/"+name+".csv", index=False)
-
-# Feature computing for train and test sets
-molPropToCSV(train, "train")
-molPropToCSV(test, "test")

@@ -1,12 +1,22 @@
 import pandas as pd
+from cgi import test
+from tools import molPropToCSV
 
 
-df = pd.read_csv('Features/train_properties.csv')
 
-if 'ID' in df.columns:
-    df.drop(columns=['ID'], inplace=True)
+# Feature computing for train and test sets
+train = pd.read_csv("Data/train.csv")
+test = pd.read_csv("Data/test.csv")
 
-features_analysis = df.describe().drop('count')
+molPropToCSV(train, "train")
+molPropToCSV(test, "test")
+
+train_prop = pd.read_csv('Features/train_properties.csv')
+
+if 'ID' in train_prop.columns:
+    train_prop.drop(columns=['ID'], inplace=True)
+
+features_analysis = train_prop.describe().drop('count')
 features_analysis.to_csv('Features/Features_analysis.csv')
 
 
