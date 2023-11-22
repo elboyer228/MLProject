@@ -1,3 +1,7 @@
+# Including parent folder for imports
+import sys, os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -74,5 +78,5 @@ def LinearRegressionModel(type = "normal"):
 
 LinearRegressionModel("fingerprints")
 LinearRegressionModel("normal")
-LinearRegressionModel("enhanced")
-LinearRegressionModel("more_features")
+# LinearRegressionModel("enhanced")
+# LinearRegressionModel("more_features")

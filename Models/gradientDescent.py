@@ -1,12 +1,16 @@
+# Including parent folder for imports
+import sys, os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
+import pandas as pd
+import numpy as np 
+import matplotlib.pyplot as plt
+from tools import saveSubmission
+
 from sklearn.linear_model import SGDRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-
-import pandas as pd
-from tools import saveSubmission
-import matplotlib.pyplot as plt
-import numpy as np 
 
 
 
