@@ -1,15 +1,6 @@
 import pandas as pd
 from cgi import test
-from tools import molPropToCSV
 
-
-
-# Feature computing for train and test sets
-train = pd.read_csv("Data/train.csv")
-test = pd.read_csv("Data/test.csv")
-
-molPropToCSV(train, "train")
-molPropToCSV(test, "test")
 
 train_prop = pd.read_csv('Features/train_properties.csv')
 
