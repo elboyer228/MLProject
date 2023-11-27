@@ -13,7 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error
 import torch
 
-from tools import selectFeatures, getTarget, saveSubmission
+from tools import selectFeatures, getTarget, plotHistory, saveSubmission
 
 
 
@@ -115,6 +115,8 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
     best_val_loss = float('inf')
     # Initialize patience counter
     patience_counter = 0
+    # Initialize history dictionary
+    history = {'train_loss': [], 'val_loss': []}
 
     model = NeuralNet()
     loss_func = torch.nn.MSELoss()
@@ -122,7 +124,8 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
 
     # Training
     model.train()
-    for epoch in tqdm(range(epochs)):
+    iterator = tqdm(range(epochs)) if not verbose else range(epochs)
+    for epoch in iterator:
         model.train()
         for data, target in training_dataloader:
             optimizer.zero_grad()
@@ -131,14 +134,19 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
             loss.backward()
             optimizer.step()
             
-        if verbose:
-            print(f'Epoch {epoch+1}/{epochs}', f'Loss: {loss.item()}', end='\r')
             
         # Validation
         model.eval()
         with torch.no_grad():
             pred_val = model(X_val_ten)
-            val_loss = torch.sqrt(loss_func(pred_val, y_val_ten)) 
+            val_loss = (loss_func(pred_val, y_val_ten)).numpy()
+            
+        if verbose and epoch % 10 == 0:
+            print(f'Epoch {epoch}/{epochs} ({round((epoch/epochs)*100, 1)}%)', f'Training Loss: {loss.item()}', f"Validation loss : {val_loss}", end='\r')
+        
+        # History
+        history['train_loss'].append(loss.item())
+        history['val_loss'].append(val_loss)
             
         # Check for early stopping
         if val_loss < best_val_loss:
@@ -147,36 +155,36 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
         else:
             patience_counter += 1
             if patience_counter >= patience:
-                print("Early stopping")
+                if not verbose:
+                    iterator.close()
+                print("\n ----- Early stopping -----")
                 break
 
 
     # Evaluation and computation of the train and test losss
     model.eval()
     with torch.no_grad():
-        pred_train = model(X_ten)
-        pred_val = model(X_val_ten)
+        
+        pred_train = model(X_ten).detach()
+        pred_val = model(X_val_ten).detach()
 
         # Inverse transform the predictions
         pred_train = Yscaler.inverse_transform(pred_train.numpy())
         pred_val = Yscaler.inverse_transform(pred_val.numpy())
-
-        # Convert the targets back to numpy and inverse transform
-        y_train_np = Yscaler.inverse_transform(y_ten.numpy())
-        y_val_np = Yscaler.inverse_transform(y_val_ten.numpy())
+        y_train = Yscaler.inverse_transform(y_ten.numpy())
+        y_val = Yscaler.inverse_transform(y_val_ten.numpy())
 
         # Compute the loss with the inverse transformed data
-        train_loss = torch.sqrt(loss_func(torch.from_numpy(pred_train), torch.from_numpy(y_train_np)))
-        val_loss = torch.sqrt(loss_func(torch.from_numpy(pred_val), torch.from_numpy(y_val_np)))
+        train_loss = loss_func(torch.from_numpy(pred_train), torch.from_numpy(y_train))
+        val_loss = loss_func(torch.from_numpy(pred_val), torch.from_numpy(y_val))
 
-        print(f"Train loss: {train_loss}")
-        print(f"Validation loss: {val_loss}")
         
+        # Prediction on test set
         if export:
             predictions = Yscaler.inverse_transform(model(X_test_ten).detach().numpy())
             saveSubmission(predictions.flatten(), name)
             
-    return val_loss
+    return history, train_loss, val_loss
 
 
 
@@ -185,16 +193,23 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
 X_set, X_test = selectFeatures(Lab=True, mol=True) 
 y_set = getTarget()
 
-# neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150, lr=0.0001, patience=50, verbose=False, export=False, name="NeuralNetwork")
+history, train_loss, val_loss = neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=1500, lr=0.00023, patience=50, verbose=False, export=False, name="NeuralNetwork_LabMol")
+print(f"Train loss : {train_loss}, Validation loss: {val_loss}")
+plotHistory(history)
 
 # Plot different learning rates
-learning_rates = np.linspace(0.00001, 0.001, 10)
-validation_losses = []
-for lr in learning_rates:
-    validation_losses.append(neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=1500, lr=lr, patience=50, verbose=False, export=False, name="NeuralNetwork"))
-    
-plt.plot(learning_rates, validation_losses)
-plt.xlabel("Learning rate")
-plt.ylabel("Validation loss")
-plt.xscale("log")
-plt.savefig("Analysis/NeuralNetworks/learning_rates.png")
+def plotLR():
+    learning_rates = np.linspace(0.00001, 0.001, 10)
+    train_losses = []
+    validation_losses = []
+    for lr in learning_rates:
+        train_loss, validation_loss = neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=1500, lr=lr, patience=50, verbose=False, export=False, name="NeuralNetwork")
+        train_losses.append(train_loss)
+        validation_losses.append(validation_loss)
+        print(f"Learning rate: {lr}, Train loss : {train_losses[-1]}, Validation loss: {validation_losses[-1]}")
+        
+    plt.plot(learning_rates, validation_losses)
+    plt.xlabel("Learning rate")
+    plt.ylabel("Validation loss")
+    plt.xscale("log")
+    plt.show()

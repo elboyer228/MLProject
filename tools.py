@@ -101,3 +101,55 @@ def getTarget():
     """
     train = pd.read_csv("Data/full_train_data.csv")
     return train.loc[:, 'RT']
+
+
+def plotHistory(history, type = "PyTorch"):
+    """
+    This function plots the training and validation loss for a given model's history.
+
+    Parameters
+    ----------
+    history : dict or keras.callbacks.History
+        The history object returned by the model's fit method. 
+        For PyTorch, this should be a dictionary with 'train_loss' and 'val_loss' keys. 
+        For Keras, this should be a keras.callbacks.History object.
+
+    type : str, optional
+        The type of model that generated the history. This should be either 'PyTorch' or 'Keras'. The default is 'PyTorch'.
+
+    Returns
+    -------
+    None
+        This function doesn't return anything; it shows a matplotlib plot.
+
+    Raises
+    ------
+    ValueError
+        If the type parameter is not 'PyTorch' or 'Keras'.
+    """
+    if type == "PyTorch":
+        fig, ax = plt.subplots(figsize=(10,5))
+        ax.plot(history['train_loss'], label='Training loss')
+        ax.plot(history['val_loss'], label='Validation loss')
+        ax.set_title('Training and validation loss (standardized data)')
+        ax.set_xlabel('Epochs')
+        ax.set_ylabel('Loss')
+        ax.legend()
+        plt.show()
+    elif type == "Keras":
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15,5))
+        ax1.plot(history.history['loss'], label='Training loss')
+        ax1.plot(history.history['val_loss'], label='Validation loss')
+        ax1.set_title('Training and validation loss')
+        ax1.set_xlabel('Epochs')
+        ax1.set_ylabel('Loss')
+        ax1.legend()
+        ax2.plot(history.history['accuracy'], label='Training accuracy')
+        ax2.plot(history.history['val_accuracy'], label='Validation accuracy')
+        ax2.set_title('Training and validation accuracy')
+        ax2.set_xlabel('Epochs')
+        ax2.set_ylabel('Accuracy')
+        ax2.legend()
+        plt.show()
+    else:
+        raise ValueError("Invalid type. Must be 'PyTorch' or 'Keras'.")

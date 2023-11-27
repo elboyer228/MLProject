@@ -60,28 +60,6 @@ clean_train = train.drop(ConstantECFP.values, axis=1)
 clean_test = test.drop(ConstantECFP.values, axis=1)
 
 
-# Remove correlated predictors
-print("-------------- Correlated predictors --------------")
-
-# Compute and remove correlated predictors from both train and test
-# Training set
-train_before = clean_train_properties.shape[1]
-corr_matrix = clean_train_properties.corr().abs()
-upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(np.bool_))
-to_drop = [column for column in upper.columns if any(upper[column] == 1)]
-clean_train_properties = clean_train_properties.drop(to_drop, axis=1)
-train_after = clean_train_properties.shape[1]
-
-print("Train properties predictors went from", train_before, "to", train_after, "after removing correlated predictors.")
-
-# Test set
-test_before = clean_test_properties.shape[1]
-clean_test_properties = clean_test_properties.drop(to_drop, axis=1) # We use the same to_drop as for the train set
-test_after = clean_test_properties.shape[1]
-
-print("Test properties predictors went from", test_before, "to", test_after, "after removing correlated predictors.")
-
-
 
 #################### Feature engineering ####################
 
@@ -120,14 +98,14 @@ train_data = pd.concat([train_data, Lab_train], axis=1)
 test_data = pd.concat([test_data, Lab_test], axis=1)
 
 # Adding ECFP fingerprints
-train_data = pd.concat([train_data, train.loc[:, 'ECFP_1':'ECFP_1024']], axis=1)
-test_data = pd.concat([test_data, test.loc[:, 'ECFP_1':'ECFP_1024']], axis=1)
+train_data = pd.concat([train_data, clean_train.loc[:, 'ECFP_1':'ECFP_1024']], axis=1)
+test_data = pd.concat([test_data, clean_test.loc[:, 'ECFP_1':'ECFP_1024']], axis=1)
 
 # Adding cddd fingerprints
-train_data = pd.merge(train_data, cddd, on='SMILES', how='left')
-test_data = pd.merge(test_data, cddd, on='SMILES', how='left')
+train_data = pd.merge(train_data, clean_cddd, on='SMILES', how='left')
+test_data = pd.merge(test_data, clean_cddd, on='SMILES', how='left')
 
-# Adding properties
+# Adding properties (after experimental tryouts, we decided to keep all properties, not only the ones that are not constant)
 train_data = pd.concat([train_data, train_properties], axis=1)
 test_data = pd.concat([test_data, test_properties], axis=1)
 
