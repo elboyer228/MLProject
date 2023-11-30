@@ -195,3 +195,7 @@ Temporary Items
 ### macOS Patch ###
 # iCloud generated files
 *.icloud
+
+
+# Hyperparameter tuning directory
+hptuning/
