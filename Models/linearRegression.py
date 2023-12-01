@@ -51,7 +51,7 @@ def LinearRegressionModel(type = "normal"):
 
     # Predicting and saving data
     predicted = model.predict(X_test)
-    saveSubmission(predicted, "LinearRegression_" + type)
+    saveSubmission(predicted, "LinearRegression/LinearRegression_" + type)
 
 
     # Testing the fit by plotting predictions on the training data

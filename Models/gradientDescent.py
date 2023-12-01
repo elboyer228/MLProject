@@ -34,7 +34,7 @@ reg.fit(X, y)
 
 # Predicting and saving data
 predicted = reg.predict(X_test)
-saveSubmission(predicted, "SGDRegression_" + "enhanced")
+saveSubmission(predicted, "GradientDescent/SGDRegression_" + "enhanced")
 
 
 predictedTraining = reg.predict(X)

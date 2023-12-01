@@ -73,7 +73,7 @@ y_pred = Yscaler.inverse_transform(y_pred).reshape(-1)
 
 # Transforming to array and saving
 y_pred = np.array(y_pred)
-# saveSubmission(y_pred, 'kerasNetwork')
+# saveSubmission(y_pred, 'KerasNetworks/kerasNetwork')
 
 
 
@@ -106,7 +106,7 @@ tuner = RandomSearch(
     max_trials=50,
     executions_per_trial=3,
     overwrite=True,
-    directory='Hyperparameter_tuning/RandomSearch',
+    directory='hptuning/RandomSearch',
     project_name='keras_tuning'
 )
 
