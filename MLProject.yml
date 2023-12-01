@@ -5,6 +5,7 @@ channels:
   - defaults
 dependencies:
   - abseil-cpp=20230802.0=h313beb8_2
+  - alembic=1.12.1=pyhd8ed1ab_0
   - arrow-cpp=11.0.0=hc7aafb3_2
   - aws-c-common=0.6.8=h80987f9_1
   - aws-c-event-stream=0.1.6=h313beb8_6
@@ -23,6 +24,8 @@ dependencies:
   - certifi=2023.11.17=pyhd8ed1ab_0
   - cffi=1.16.0=py39h80987f9_0
   - charset-normalizer=2.0.4=pyhd3eb1b0_0
+  - colorama=0.4.6=pyhd8ed1ab_0
+  - colorlog=6.7.0=py39h2804cbe_2
   - configparser=5.0.2=pyhd3eb1b0_0
   - contourpy=1.2.0=py39h48ca7d4_0
   - cryptography=41.0.3=py39hd4332d6_0
@@ -51,6 +54,7 @@ dependencies:
   - gtest=1.14.0=h48ca7d4_0
   - icu=73.2=hc8870d7_0
   - idna=3.4=py39hca03da5_0
+  - importlib-metadata=6.8.0=pyha770c72_0
   - importlib_resources=6.1.0=py39hca03da5_0
   - jinja2=3.1.2=py39hca03da5_0
   - joblib=1.2.0=py39hca03da5_0
@@ -91,6 +95,7 @@ dependencies:
   - libzlib=1.2.13=h53f4e23_5
   - llvm-openmp=17.0.5=hcd81f8e_0
   - lz4-c=1.9.4=h313beb8_0
+  - mako=1.3.0=pyhd8ed1ab_0
   - markupsafe=2.1.1=py39h1a28f6b_0
   - matplotlib=3.8.0=py39hca03da5_0
   - matplotlib-base=3.8.0=py39h46d7db6_0
@@ -106,7 +111,8 @@ dependencies:
   - numpy-base=1.26.0=py39ha9811e2_0
   - openjpeg=2.3.0=h7a6adac_2
   - openml=0.12.2=pyhd3eb1b0_0
-  - openssl=3.1.4=h0d3ecfb_0
+  - openssl=3.2.0=h0d3ecfb_0
+  - optuna=3.4.0=pyhd8ed1ab_0
   - orc=1.7.4=hdca1487_1
   - packaging=23.1=py39hca03da5_0
   - pandas=2.1.1=py39h46d7db6_0
@@ -147,6 +153,7 @@ dependencies:
   - torchaudio=2.2.0.dev20231121=py39_cpu
   - torchvision=0.17.0.dev20231121=py39_cpu
   - tornado=6.3.3=py39h80987f9_0
+  - tqdm=4.66.1=pyhd8ed1ab_0
   - typing-extensions=4.7.1=py39hca03da5_0
   - typing_extensions=4.7.1=py39hca03da5_0
   - tzdata=2023c=h04d1e81_0
@@ -171,9 +178,10 @@ dependencies:
       - google-pasta==0.2.0
       - grpcio==1.59.3
       - h5py==3.10.0
-      - importlib-metadata==6.8.0
       - kaggle==1.5.16
       - keras==2.15.0
+      - keras-tuner==1.4.6
+      - kt-legacy==1.0.5
       - libclang==16.0.6
       - markdown==3.5.1
       - ml-dtypes==0.2.0
@@ -192,10 +200,8 @@ dependencies:
       - tensorflow-estimator==2.15.0
       - tensorflow-io-gcs-filesystem==0.34.0
       - tensorflow-macos==2.15.0
-      - tensorflow-metal==1.1.0
       - termcolor==2.3.0
       - text-unidecode==1.3
-      - tqdm==4.66.1
       - webencodings==0.5.1
       - werkzeug==3.0.1
       - wrapt==1.14.1
