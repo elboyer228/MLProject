@@ -13,6 +13,7 @@ import keras
 from keras import layers
 from keras_tuner import RandomSearch
 from keras.callbacks import EarlyStopping
+from keras.losses import mean_squared_error
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -21,21 +22,34 @@ from tools import selectFeatures, getTarget, plotHistory, saveSubmission
 
 
 
-X_set, X_test = selectFeatures(Lab=True, mol=True)
-y_set = getTarget()
-
 # Reproducibility
 seed_num = 42
 np.random.seed(seed_num)
 tf.random.set_seed(seed_num)
 
 
+X_set, X_test = selectFeatures(Lab=True, mol=True)
+y_set = getTarget()
+
+# Splitting test and train
+
+X_train, X_val, y_train, y_val = train_test_split(
+    X_set,
+    y_set,
+    test_size=0.20,
+    random_state=seed_num
+)
+
+
 # Standardize data
 Xscaler = StandardScaler()
-X_std = Xscaler.fit_transform(X_set)
+X_std = Xscaler.fit_transform(X_train)
+X_val_std = Xscaler.transform(X_val)
 X_test_std = Xscaler.transform(X_test)
 Yscaler = StandardScaler()
-y_std = Yscaler.fit_transform(y_set.values.reshape(-1, 1))
+y_std = Yscaler.fit_transform(y_train.values.reshape(-1, 1))
+y_val_std = Yscaler.transform(y_val.values.reshape(-1, 1))
+
 
  
 # Setting up the model
@@ -49,31 +63,48 @@ def build_model():
 
     model.compile(
         optimizer=keras.optimizers.Adam(),
-        loss="mean_squared_error",
-        metrics=[keras.metrics.MeanSquaredError()]
+        loss="mean_squared_error"
     )
     
     return model
 
 
 model = build_model()
-model.summary()
-history = model.fit(
-    X_std,
-    y_std,
-    epochs=1000,
-    batch_size=128,
-    validation_split=0.2,
-    verbose=2
-)
+# model.summary()
+# history = model.fit(
+#     X_std,
+#     y_std,
+#     epochs=1000,
+#     batch_size=128,
+#     validation_data=(X_val_std, y_val_std),
+#     verbose=2,
+#     callbacks=[EarlyStopping(monitor='val_loss', patience=50, restore_best_weights=True)]
+# )
 
-# Predictions for the test set
-y_pred = model.predict(X_test_std)
-y_pred = Yscaler.inverse_transform(y_pred).reshape(-1)
+# # Predictions for the validation set
+# y_pred_val = model.predict(X_val_std)
+# y_pred_val = Yscaler.inverse_transform(y_pred_val).reshape(-1)
 
-# Transforming to array and saving
-y_pred = np.array(y_pred)
-# saveSubmission(y_pred, 'KerasNetworks/kerasNetwork')
+# y_pred_train = model.predict(X_std)
+# y_pred_train = Yscaler.inverse_transform(y_pred_train).reshape(-1)
+
+# # Compute mean squared error
+# val_loss = mean_squared_error(y_val, y_pred_val)
+# loss = mean_squared_error(y_train, y_pred_train)
+
+
+# # Inverse transform the losses and print
+# print(f"Train loss : {loss}, Validation loss: {val_loss}")
+
+
+# # Predictions for the test set
+# y_pred = model.predict(X_test_std)
+# y_pred = Yscaler.inverse_transform(y_pred).reshape(-1)
+
+
+# # Transforming to array and saving
+# y_pred = np.array(y_pred)
+# saveSubmission(y_pred, 'KerasNetworks/testValue')
 
 
 
@@ -96,13 +127,12 @@ def build_model_tunned(hp):
         optimizer=keras.optimizers.legacy.Adam(
             hp.Float('learning_rate', min_value=1e-5, max_value=1e-2, sampling='LOG', default=1e-3)),
         loss="mean_squared_error",
-        metrics=[keras.metrics.MeanSquaredError()]
     )
     return model
 
 tuner = RandomSearch(
     build_model_tunned,
-    objective='val_mean_squared_error',
+    objective='val_loss',
     max_trials=50,
     executions_per_trial=3,
     overwrite=True,
@@ -114,20 +144,29 @@ tuner.search_space_summary()
 
 tuner.search(X_std, y_std,
              epochs=50,
-             validation_split=0.2,
-             callbacks=[EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)])
+             validation_data=(X_val_std, y_val_std),
+             callbacks=[EarlyStopping(monitor='val_loss', patience=25, restore_best_weights=True)])
 
 best_model = tuner.get_best_models(num_models=1)[0]
 best_model.summary()
 
-early_stopping = EarlyStopping(
-    monitor='val_loss',
-    patience=50,
-    restore_best_weights=True
-)
 
-best_model.fit(X_std, y_std, epochs=1000, validation_split=0.2, callbacks=[early_stopping])
+best_model.fit(X_std, y_std, epochs=1000, validation_data=(X_val_std, y_val_std), callbacks=[EarlyStopping(monitor='val_loss', patience=50, restore_best_weights=True)])
 
+# Predictions for the validation set
+y_pred_val = best_model.predict(X_val_std)
+y_pred_val = Yscaler.inverse_transform(y_pred_val).reshape(-1)
+
+y_pred_train = best_model.predict(X_std)
+y_pred_train = Yscaler.inverse_transform(y_pred_train).reshape(-1)
+
+# Compute mean squared error
+val_loss = mean_squared_error(y_val, y_pred_val)
+loss = mean_squared_error(y_train, y_pred_train)
+
+
+# Inverse transform the losses and print
+print(f"Train loss : {loss}, Validation loss: {val_loss}")
 
 # Predictions for the test set
 y_pred = best_model.predict(X_test_std)
@@ -135,4 +174,4 @@ y_pred = Yscaler.inverse_transform(y_pred).reshape(-1)
 
 # # Transforming to array and saving
 y_pred = np.array(y_pred)
-# saveSubmission(y_pred, 'HP_tuned_kerasNetwork')
+saveSubmission(y_pred, 'KerasNetworks/BigHPTuning')
