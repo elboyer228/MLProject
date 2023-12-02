@@ -11,7 +11,6 @@ from tqdm import tqdm
 import tensorflow as tf
 import keras
 from keras import layers
-from keras_tuner import RandomSearch
 from keras.callbacks import EarlyStopping
 from keras.losses import mean_squared_error
 
@@ -56,13 +55,15 @@ y_val_std = Yscaler.transform(y_val.values.reshape(-1, 1))
 def build_model():
     model = keras.Sequential([
         keras.Input(shape=X_set.shape[1]),
-        layers.Dense(128, activation='relu'),
-        layers.Dropout(0.5),
+        layers.Dense(416, activation='relu'),
+        layers.Dense(352, activation='relu'),
+        layers.Dense(288, activation='relu'),
+        layers.Dense(416, activation='relu'),
         layers.Dense(1)
     ])
 
     model.compile(
-        optimizer=keras.optimizers.Adam(),
+        optimizer=keras.optimizers.AdamW(0.0016),
         loss="mean_squared_error"
     )
     
@@ -70,94 +71,22 @@ def build_model():
 
 
 model = build_model()
-# model.summary()
-# history = model.fit(
-#     X_std,
-#     y_std,
-#     epochs=1000,
-#     batch_size=128,
-#     validation_data=(X_val_std, y_val_std),
-#     verbose=2,
-#     callbacks=[EarlyStopping(monitor='val_loss', patience=50, restore_best_weights=True)]
-# )
-
-# # Predictions for the validation set
-# y_pred_val = model.predict(X_val_std)
-# y_pred_val = Yscaler.inverse_transform(y_pred_val).reshape(-1)
-
-# y_pred_train = model.predict(X_std)
-# y_pred_train = Yscaler.inverse_transform(y_pred_train).reshape(-1)
-
-# # Compute mean squared error
-# val_loss = mean_squared_error(y_val, y_pred_val)
-# loss = mean_squared_error(y_train, y_pred_train)
-
-
-# # Inverse transform the losses and print
-# print(f"Train loss : {loss}, Validation loss: {val_loss}")
-
-
-# # Predictions for the test set
-# y_pred = model.predict(X_test_std)
-# y_pred = Yscaler.inverse_transform(y_pred).reshape(-1)
-
-
-# # Transforming to array and saving
-# y_pred = np.array(y_pred)
-# saveSubmission(y_pred, 'KerasNetworks/testValue')
-
-
-
-
-######### Model tuning #########
-
-def build_model_tunned(hp):
-    model = keras.Sequential()
-    model.add(keras.Input(shape=X_set.shape[1]))
-    for i in range(hp.Int('num_layers', 2, 20)):
-        model.add(layers.Dense(units=hp.Int('units_' + str(i),
-                                            min_value=32,
-                                            max_value=512,
-                                            step=32),
-                               activation='relu'))
-    model.add(layers.Dense(1))
-    
-    
-    model.compile(
-        optimizer=keras.optimizers.legacy.Adam(
-            hp.Float('learning_rate', min_value=1e-5, max_value=1e-2, sampling='LOG', default=1e-3)),
-        loss="mean_squared_error",
-    )
-    return model
-
-tuner = RandomSearch(
-    build_model_tunned,
-    objective='val_loss',
-    max_trials=50,
-    executions_per_trial=3,
-    overwrite=True,
-    directory='hptuning/RandomSearch',
-    project_name='keras_tuning'
+model.summary()
+history = model.fit(
+    X_std,
+    y_std,
+    epochs=1000,
+    batch_size=128,
+    validation_data=(X_val_std, y_val_std),
+    verbose=2,
+    callbacks=[EarlyStopping(monitor='val_loss', patience=50, restore_best_weights=True)]
 )
 
-tuner.search_space_summary()
-
-tuner.search(X_std, y_std,
-             epochs=50,
-             validation_data=(X_val_std, y_val_std),
-             callbacks=[EarlyStopping(monitor='val_loss', patience=25, restore_best_weights=True)])
-
-best_model = tuner.get_best_models(num_models=1)[0]
-best_model.summary()
-
-
-best_model.fit(X_std, y_std, epochs=1000, validation_data=(X_val_std, y_val_std), callbacks=[EarlyStopping(monitor='val_loss', patience=50, restore_best_weights=True)])
-
 # Predictions for the validation set
-y_pred_val = best_model.predict(X_val_std)
+y_pred_val = model.predict(X_val_std)
 y_pred_val = Yscaler.inverse_transform(y_pred_val).reshape(-1)
 
-y_pred_train = best_model.predict(X_std)
+y_pred_train = model.predict(X_std)
 y_pred_train = Yscaler.inverse_transform(y_pred_train).reshape(-1)
 
 # Compute mean squared error
@@ -168,10 +97,12 @@ loss = mean_squared_error(y_train, y_pred_train)
 # Inverse transform the losses and print
 print(f"Train loss : {loss}, Validation loss: {val_loss}")
 
+
 # Predictions for the test set
-y_pred = best_model.predict(X_test_std)
+y_pred = model.predict(X_test_std)
 y_pred = Yscaler.inverse_transform(y_pred).reshape(-1)
 
-# # Transforming to array and saving
+
+# Transforming to array and saving
 y_pred = np.array(y_pred)
-saveSubmission(y_pred, 'KerasNetworks/BigHPTuning')
+saveSubmission(y_pred, 'KerasNetworks/kerasNetwork')
