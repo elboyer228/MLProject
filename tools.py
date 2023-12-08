@@ -37,7 +37,7 @@ def saveSubmission(predicted, name = "output"):
     submission.to_csv("Submissions/"+name+".csv", index=False)
     
     
-def selectFeatures(Lab=False, ECFP=False, cddd=False, mol=False):
+def selectFeatures(number, Lab=False, ECFP=False, cddd=False, mol=False):
     """
     This function selects the specified features from the training and test datasets.
     The features are extracted from the enhanced dataset contained in the Data folder.
@@ -45,6 +45,8 @@ def selectFeatures(Lab=False, ECFP=False, cddd=False, mol=False):
 
     Parameters
     ----------
+    number : int
+        The number of most important molecular features to select. Only applicable when `mol` is True.
     Lab : bool, optional
         If True, includes features 'Lab_1' to 'Lab_24'. By default, False.
     ECFP : bool, optional
@@ -52,7 +54,8 @@ def selectFeatures(Lab=False, ECFP=False, cddd=False, mol=False):
     cddd : bool, optional
         If True, includes features 'cddd_1' to 'cddd_512'. By default, False.
     mol : bool, optional
-        If True, includes features 'MaxAbsEStateIndex' to 'fr_urea'. By default, False.
+        If True, includes molecular features. If `number` is specified, selects the `number` most important features.
+        By default, False.
 
     Returns
     -------
@@ -63,6 +66,7 @@ def selectFeatures(Lab=False, ECFP=False, cddd=False, mol=False):
     
     train = pd.read_csv("Data/full_train_data.csv")
     test = pd.read_csv("Data/full_test_data.csv")
+    imp = pd.read_csv("Features/permutation_importance.csv")
         
     train_features = []
     test_features = []
@@ -83,13 +87,21 @@ def selectFeatures(Lab=False, ECFP=False, cddd=False, mol=False):
         cddd_test = test.loc[:, 'cddd_1':'cddd_512']
         test_features.append(cddd_test)
     if mol:
-        molecular_train = train.loc[:, 'MaxAbsEStateIndex':'fr_urea']
-        train_features.append(molecular_train)
-        molecular_test = test.loc[:, 'MaxAbsEStateIndex':'fr_urea']
-        test_features.append(molecular_test)
+        # if number is between 1 and 210, we select the number most important features
+        if number > 0 and number <= 210:
+            Lab_train = train[imp.loc[:number-1, 'Feature']]
+            train_features.append(Lab_train)
+            Lab_test = test[imp.loc[:number-1, 'Feature']]
+            test_features.append(Lab_test)
+        else:
+            molecular_train = train.loc[:, 'MaxAbsEStateIndex':'fr_urea']
+            train_features.append(molecular_train)
+            molecular_test = test.loc[:, 'MaxAbsEStateIndex':'fr_urea']
+            test_features.append(molecular_test)
     
     return pd.concat(train_features, axis=1), pd.concat(test_features, axis=1)
 
+print(selectFeatures(mol=True, number=3)[0])
 
 def getTarget():
     """This function returns the target variable from the training dataset.
