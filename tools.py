@@ -37,7 +37,7 @@ def saveSubmission(predicted, name = "output"):
     submission.to_csv("Submissions/"+name+".csv", index=False)
     
     
-def selectFeatures(number, Lab=False, ECFP=False, cddd=False, mol=False):
+def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False):
     """
     This function selects the specified features from the training and test datasets.
     The features are extracted from the enhanced dataset contained in the Data folder.
@@ -45,8 +45,9 @@ def selectFeatures(number, Lab=False, ECFP=False, cddd=False, mol=False):
 
     Parameters
     ----------
-    number : int
+    bestFeatures : int
         The number of most important molecular features to select. Only applicable when `mol` is True.
+        If set to 0, all molecular features are selected. By default, 0.
     Lab : bool, optional
         If True, includes features 'Lab_1' to 'Lab_24'. By default, False.
     ECFP : bool, optional
@@ -88,10 +89,10 @@ def selectFeatures(number, Lab=False, ECFP=False, cddd=False, mol=False):
         test_features.append(cddd_test)
     if mol:
         # if number is between 1 and 210, we select the number most important features
-        if number > 0 and number <= 210:
-            Lab_train = train[imp.loc[:number-1, 'Feature']]
+        if bestFeatures > 0 and bestFeatures <= 210:
+            Lab_train = train[imp.loc[:bestFeatures-1, 'Feature']]
             train_features.append(Lab_train)
-            Lab_test = test[imp.loc[:number-1, 'Feature']]
+            Lab_test = test[imp.loc[:bestFeatures-1, 'Feature']]
             test_features.append(Lab_test)
         else:
             molecular_train = train.loc[:, 'MaxAbsEStateIndex':'fr_urea']
