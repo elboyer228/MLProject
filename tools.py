@@ -101,7 +101,6 @@ def selectFeatures(number, Lab=False, ECFP=False, cddd=False, mol=False):
     
     return pd.concat(train_features, axis=1), pd.concat(test_features, axis=1)
 
-print(selectFeatures(mol=True, number=3)[0])
 
 def getTarget():
     """This function returns the target variable from the training dataset.
