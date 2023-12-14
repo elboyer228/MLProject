@@ -9,27 +9,25 @@ from sklearn.linear_model import LinearRegression
 from tools import selectFeatures, getTarget, saveSubmission
 
 seed_num = 30
-# train_prop = pd.read_csv('Features/train_properties.csv')
-
-# if 'ID' in train_prop.columns:
-#     train_prop.drop(columns=['ID'], inplace=True)
-
-# features_analysis = train_prop.describe().drop('count')
-# features_analysis.to_csv('Features/Features_analysis.csv')
-
-
-# features_analysis_clean = features_analysis.copy()
-
-
-# for column in features_analysis_clean.columns:
-#     if 0 <= features_analysis_clean[column]['mean'] <= 0.02:
-#         features_analysis_clean.drop(columns=[column], inplace=True)
-
-
-# features_analysis_clean.to_csv('Features/Features_analysis_clean.csv')
-
-# print(f'number of columns before cleaning: {len(features_analysis.columns)}')
-# print( f'number of columns after cleaning: {len(features_analysis_clean.columns)}')
+def clean_features(file_path = 'Features/train_properties.csv'):
+    train_prop = pd.read_csv(file_path)
+    
+    if 'ID' in train_prop.columns:
+        train_prop.drop(columns=['ID'], inplace=True)
+    
+    features_analysis = train_prop.describe().drop('count')
+    features_analysis.to_csv('Features/Features_analysis.csv')
+    
+    features_analysis_clean = features_analysis.copy()
+    
+    for column in features_analysis_clean.columns:
+        if 0 <= features_analysis_clean[column]['mean'] <= 0.02:
+            features_analysis_clean.drop(columns=[column], inplace=True)
+    
+    features_analysis_clean.to_csv('Features/Features_analysis_clean.csv')
+    
+    print(f'Number of columns before cleaning: {len(features_analysis.columns)}')
+    print(f'Number of columns after cleaning: {len(features_analysis_clean.columns)}')
 
 
 # Features impotance analysis of cdd and ECFP features
@@ -78,34 +76,35 @@ def findMostImportantFeatures(Features = 'cddd', number_of_important_features=10
 
     selected_feature_names = X_train.columns[list(selected_features)]
     important_data = X_set[selected_feature_names]
+    important_data = important_data.rename(columns={important_data.columns[0]: 'first_selected_feature'})
 
     if Features == 'cddd': 
-        # Get the column names for the 1047th to 1558th columns
-        cols_to_drop_train = full_train_set.columns[1046:1558]
-        cols_to_drop_test = full_test_set.columns[1045:1557]
-
-        select_features_full_train_set = full_train_set.drop(columns=cols_to_drop_train)
+        cols_to_drop = [f'cddd_{i}' for i in range(1, 513)]
+    
+        select_features_full_train_set = full_train_set.drop(columns=cols_to_drop)
         select_features_full_train_set = pd.concat([select_features_full_train_set, important_data], axis=1)
         select_features_full_train_set.to_csv('Data/select_features_full_train_set.csv', index=False)
         
-        select_features_full_test_set = full_test_set.drop(columns=cols_to_drop_test)
+        select_features_full_test_set = full_test_set.drop(columns=cols_to_drop)
         select_features_full_test_set = pd.concat([select_features_full_test_set, important_data], axis=1)
+
         select_features_full_test_set.to_csv('Data/select_features_full_test_set.csv', index=False)
 
     if Features == 'ECFP':
-        cols_to_drop_train = full_train_set.columns[27:1046]
-        cols_to_drop_test = full_test_set.columns[26:1045]
-
-        select_features_full_train_set = full_train_set.drop(columns=cols_to_drop_train)
+        
+        cols_to_drop = [f'ECFP_{i}' for i in range(1, 1025)]
+        
+        
+        select_features_full_train_set = full_train_set.drop(columns=cols_to_drop)
         select_features_full_train_set = pd.concat([select_features_full_train_set, important_data], axis=1)
         select_features_full_train_set.to_csv('Data/select_features_full_train_set.csv', index=False)
 
-        select_features_full_test_set = full_test_set.drop(columns=cols_to_drop_test)
+        select_features_full_test_set = full_test_set.drop(columns=cols_to_drop)
         select_features_full_test_set = pd.concat([select_features_full_test_set, important_data], axis=1)
         select_features_full_test_set.to_csv('Data/select_features_full_test_set.csv', index=False)
         
     if Features == 'both':
-        important_data.to_csv(f'cddd_ECFP_importance_{len(selected_features)}.csv', index=False)
+
         cols_to_drop_train = full_train_set.columns[27:1558]
         cols_to_drop_test = full_test_set.columns[26:1557]
 
@@ -119,4 +118,4 @@ def findMostImportantFeatures(Features = 'cddd', number_of_important_features=10
 
 
 
-findMostImportantFeatures(Features='cddd', number_of_important_features=70)
+findMostImportantFeatures(Features='cddd', number_of_important_features=10)

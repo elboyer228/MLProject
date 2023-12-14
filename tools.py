@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# RDKit
 from rdkit import Chem
 from rdkit.Chem import Descriptors
 
@@ -37,7 +36,7 @@ def saveSubmission(predicted, name = "output"):
     submission.to_csv("Submissions/"+name+".csv", index=False)
     
     
-def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False):
+def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False, feature_selection = False):
     """
     This function selects the specified features from the training and test datasets.
     The features are extracted from the enhanced dataset contained in the Data folder.
@@ -57,6 +56,8 @@ def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False)
     mol : bool, optional
         If True, includes molecular features. If `number` is specified, selects the `number` most important features.
         By default, False.
+    feature_selection : bool, optional
+        If True, take the features from the dataset created by the function `findMostImportantFeatures`. By default, False. 
 
     Returns
     -------
@@ -65,8 +66,13 @@ def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False)
         The second DataFrame contains the selected features from the test dataset.
     """
     
-    train = pd.read_csv("Data/full_train_data.csv")
-    test = pd.read_csv("Data/full_test_data.csv")
+    if feature_selection == True:
+        test = pd.read_csv("Data/select_features_full_test_set.csv")
+        train = pd.read_csv("Data/select_features_full_train_set.csv")
+    else:
+        train = pd.read_csv("Data/full_train_data.csv")
+        test = pd.read_csv("Data/full_test_data.csv")
+    
     imp = pd.read_csv("Features/permutation_importance.csv")
         
     train_features = []
@@ -99,6 +105,10 @@ def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False)
             train_features.append(molecular_train)
             molecular_test = test.loc[:, 'MaxAbsEStateIndex':'fr_urea']
             test_features.append(molecular_test)
+
+    if feature_selection: 
+        train_features.append(train.loc[:, 'first_selected_feature':])
+        test_features.append(test.loc[:, 'first_selected_feature':])
     
     return pd.concat(train_features, axis=1), pd.concat(test_features, axis=1)
 
