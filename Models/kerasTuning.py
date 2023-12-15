@@ -24,8 +24,10 @@ from tools import selectFeatures, getTarget, saveSubmission
 seed_num = 42
 keras.utils.set_random_seed(seed_num)
 
+project_name = 'cddd_decay'
 
-X_set, X_test = selectFeatures(Lab=True, mol=True)
+
+X_set, X_test = selectFeatures(Lab=True, mol=True, feature_selection=True)
 y_set = getTarget()
 
 # Splitting test and train
@@ -62,7 +64,9 @@ def build_model_tunned(hp):
     
     model.compile(
         optimizer=keras.optimizers.AdamW(
-            hp.Float('learning_rate', min_value=1e-4, max_value=1e-2, sampling='LOG', default=1e-3)),
+            learning_rate = hp.Float('learning_rate', min_value=1e-4, max_value=1e-2, sampling='LOG', default=1e-3),
+            weight_decay = hp.Float('weight_decay', min_value=1e-4, max_value=1e-2, sampling='LOG', default=1e-4)
+        ),
         loss="mean_squared_error",
     )
     return model
@@ -70,11 +74,11 @@ def build_model_tunned(hp):
 tuner = RandomSearch(
     build_model_tunned,
     objective='val_loss',
-    max_trials=500,
+    max_trials=10,
     executions_per_trial=3,
     overwrite=True,
-    directory='hptuning/RandomSearch#2',
-    project_name='Too_large_train'
+    directory='hptuning/'+project_name,
+    project_name=project_name
 )
 
 tuner.search_space_summary()
@@ -111,4 +115,4 @@ y_pred = Yscaler.inverse_transform(y_pred).reshape(-1)
 
 # # Transforming to array and saving
 y_pred = np.array(y_pred)
-saveSubmission(y_pred, 'KerasNetworks/LargestTuning')
+saveSubmission(y_pred, 'KerasNetworks/'+project_name)
