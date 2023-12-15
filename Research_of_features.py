@@ -78,6 +78,9 @@ def findMostImportantFeatures(Features = 'cddd', number_of_important_features=10
     important_data = X_set[selected_feature_names]
     important_data = important_data.rename(columns={important_data.columns[0]: 'first_selected_feature'})
 
+    important_test_data = X_test[selected_feature_names]
+    important_test_data = important_test_data.rename(columns={important_test_data.columns[0]: 'first_selected_feature'})
+
     if Features == 'cddd': 
         cols_to_drop = [f'cddd_{i}' for i in range(1, 513)]
     
@@ -86,7 +89,7 @@ def findMostImportantFeatures(Features = 'cddd', number_of_important_features=10
         select_features_full_train_set.to_csv('Data/select_features_full_train_set.csv', index=False)
         
         select_features_full_test_set = full_test_set.drop(columns=cols_to_drop)
-        select_features_full_test_set = pd.concat([select_features_full_test_set, important_data], axis=1)
+        select_features_full_test_set = pd.concat([select_features_full_test_set, important_test_data], axis=1)
 
         select_features_full_test_set.to_csv('Data/select_features_full_test_set.csv', index=False)
 
@@ -100,7 +103,7 @@ def findMostImportantFeatures(Features = 'cddd', number_of_important_features=10
         select_features_full_train_set.to_csv('Data/select_features_full_train_set.csv', index=False)
 
         select_features_full_test_set = full_test_set.drop(columns=cols_to_drop)
-        select_features_full_test_set = pd.concat([select_features_full_test_set, important_data], axis=1)
+        select_features_full_test_set = pd.concat([select_features_full_test_set, important_test_data], axis=1)
         select_features_full_test_set.to_csv('Data/select_features_full_test_set.csv', index=False)
         
     if Features == 'both':
@@ -113,7 +116,7 @@ def findMostImportantFeatures(Features = 'cddd', number_of_important_features=10
         select_features_full_train_set.to_csv('Data/select_features_full_train_set.csv', index=False)
 
         select_features_full_test_set = full_test_set.drop(columns=cols_to_drop_test)
-        select_features_full_test_set = pd.concat([select_features_full_test_set, important_data], axis=1)
+        select_features_full_test_set = pd.concat([select_features_full_test_set, important_test_data], axis=1)
         select_features_full_test_set.to_csv('Data/select_features_full_test_set.csv', index=False)
 
 
