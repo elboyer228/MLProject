@@ -40,24 +40,26 @@ def selectFeatures(Lab = False, ECFP = False, cddd = False, bestCddd = 0,  mol =
     """
     This function selects the specified features from the training and test datasets.
     The features are extracted from the enhanced dataset contained in the Data folder.
-    If no features are specified, an empty DataFrame is returned.
+    If no features are specified, empty DataFrame are returned.
 
     Parameters
     ----------
-    bestMol : int
-        The number of most important molecular features to select. Only applicable when `mol` is True.
-        If set to 0, all molecular features are selected. By default, 0.
     Lab : bool, optional
         If True, includes features 'Lab_1' to 'Lab_24'. By default, False.
     ECFP : bool, optional
         If True, includes features 'ECFP_1' to 'ECFP_1024'. By default, False.
     cddd : bool, optional
         If True, includes features 'cddd_1' to 'cddd_512'. By default, False.
+        If `bestCddd` is specified and is between 1 and 500, selects the `bestCddd` most important cddd features.
+    bestCddd : int, optional
+        The number of most important cddd features to select. Only applicable when `cddd` is True.
+        If set to 0, all cddd features are selected. By default, 0.
     mol : bool, optional
-        If True, includes molecular features. If `number` is specified, selects the `number` most important features.
+        If True, includes molecular features. If `bestMol` is specified, selects the `bestMol` most important molecular features.
         By default, False.
-    feature_selection : bool, optional
-        If True, take the features from the dataset created by the function `findMostImportantFeatures`. By default, False. 
+    bestMol : int, optional
+        The number of most important molecular features to select. Only applicable when `mol` is True.
+        If set to 0, all molecular features are selected. By default, 0.
 
     Returns
     -------
