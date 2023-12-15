@@ -88,21 +88,21 @@ def selectFeatures(Lab = False, ECFP = False, cddd = False, bestCddd = 0,  mol =
         test_features.append(ECFP_test)
     if cddd:
         # if number is between 1 and 500, we select the most important features
-        if bestCddd == 100:
-            best_train = pd.read_csv("Data/select_features_full_train_set.csv")
-            best_test = pd.read_csv("Data/select_features_full_test_set.csv")
-            train_features.append(best_train.loc[:, 'first_selected_feature':])
-            test_features.append(best_test.loc[:, 'first_selected_feature':])
-        elif bestCddd == 250:
-            best_train = pd.read_csv("Data/select_features_full_train_set_250.csv")
-            best_test = pd.read_csv("Data/select_features_full_test_set_250.csv")
-            train_features.append(best_train.loc[:, 'first_selected_feature':])
-            test_features.append(best_test.loc[:, 'first_selected_feature':])
-        else:  
-            cddd_train = train.loc[:, 'cddd_1':'cddd_512']
-            train_features.append(cddd_train)
-            cddd_test = test.loc[:, 'cddd_1':'cddd_512']
-            test_features.append(cddd_test)
+        if bestCddd > 0 and bestCddd <= 500:
+            if bestCddd == 100:
+                best_train = pd.read_csv("Data/select_features_full_train_set.csv")
+                best_test = pd.read_csv("Data/select_features_full_test_set.csv")
+                train_features.append(best_train.loc[:, 'first_selected_feature':])
+                test_features.append(best_test.loc[:, 'first_selected_feature':])
+            elif bestCddd == 250:
+                best_train = pd.read_csv("Data/select_features_full_train_set_250.csv")
+                best_test = pd.read_csv("Data/select_features_full_test_set_250.csv")
+                train_features.append(best_train.loc[:, 'first_selected_feature':])
+                test_features.append(best_test.loc[:, 'first_selected_feature':])
+            else:
+                cddd_imp = pd.read_csv("Features/cddd_importance.csv")
+                train_features.append(train.loc[:, cddd_imp.loc[:bestCddd-1, 'Feature']])
+                test_features.append(test.loc[:, cddd_imp.loc[:bestCddd-1, 'Feature']])
     if mol:
         # if number is between 1 and 210, we select the most important features
         if bestMol > 0 and bestMol <= 210:
