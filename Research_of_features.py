@@ -86,12 +86,14 @@ def findMostImportantFeatures(Features = 'cddd', number_of_important_features=10
     
         select_features_full_train_set = full_train_set.drop(columns=cols_to_drop)
         select_features_full_train_set = pd.concat([select_features_full_train_set, important_data], axis=1)
-        select_features_full_train_set.to_csv('Data/select_features_full_train_set.csv', index=False)
+        select_features_full_train_set.to_csv(f'Data/select_features_full_train_set_{number_of_important_features}.csv', index=False)
+    
         
         select_features_full_test_set = full_test_set.drop(columns=cols_to_drop)
         select_features_full_test_set = pd.concat([select_features_full_test_set, important_test_data], axis=1)
 
-        select_features_full_test_set.to_csv('Data/select_features_full_test_set.csv', index=False)
+        select_features_full_test_set.to_csv(f'Data/select_features_full_test_set_{number_of_important_features}.csv', index=False)
+    
 
     if Features == 'ECFP':
         
@@ -100,11 +102,11 @@ def findMostImportantFeatures(Features = 'cddd', number_of_important_features=10
         
         select_features_full_train_set = full_train_set.drop(columns=cols_to_drop)
         select_features_full_train_set = pd.concat([select_features_full_train_set, important_data], axis=1)
-        select_features_full_train_set.to_csv('Data/select_features_full_train_set.csv', index=False)
+        select_features_full_train_set.to_csv(f'Data/select_features_full_train_set_{number_of_important_features}.csv', index=False)
 
         select_features_full_test_set = full_test_set.drop(columns=cols_to_drop)
         select_features_full_test_set = pd.concat([select_features_full_test_set, important_test_data], axis=1)
-        select_features_full_test_set.to_csv('Data/select_features_full_test_set.csv', index=False)
+        select_features_full_test_set.to_csv(f'Data/select_features_full_test_set_{number_of_important_features}.csv', index=False)
         
     if Features == 'both':
 
@@ -113,12 +115,12 @@ def findMostImportantFeatures(Features = 'cddd', number_of_important_features=10
 
         select_features_full_train_set = full_train_set.drop(columns=cols_to_drop_train)
         select_features_full_train_set = pd.concat([select_features_full_train_set, important_data], axis=1)
-        select_features_full_train_set.to_csv('Data/select_features_full_train_set.csv', index=False)
+        select_features_full_train_set.to_csv(f'Data/select_features_full_train_set_{number_of_important_features}.csv', index=False)
 
         select_features_full_test_set = full_test_set.drop(columns=cols_to_drop_test)
         select_features_full_test_set = pd.concat([select_features_full_test_set, important_test_data], axis=1)
-        select_features_full_test_set.to_csv('Data/select_features_full_test_set.csv', index=False)
+        select_features_full_test_set.to_csv(f'Data/select_features_full_test_set_{number_of_important_features}.csv', index=False)
 
 
 
-findMostImportantFeatures(Features='cddd', number_of_important_features=100)
+findMostImportantFeatures(Features='cddd', number_of_important_features=250)
