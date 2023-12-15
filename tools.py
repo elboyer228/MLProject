@@ -36,7 +36,7 @@ def saveSubmission(predicted, name = "output"):
     submission.to_csv("Submissions/"+name+".csv", index=False)
     
     
-def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False, feature_selection = False, bestSelectedFeatures = 100):
+def selectFeatures(Lab = False, ECFP = False, cddd = False, bestCddd = 0,  mol = False, bestMol = 0):
     """
     This function selects the specified features from the training and test datasets.
     The features are extracted from the enhanced dataset contained in the Data folder.
@@ -44,7 +44,7 @@ def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False,
 
     Parameters
     ----------
-    bestFeatures : int
+    bestMol : int
         The number of most important molecular features to select. Only applicable when `mol` is True.
         If set to 0, all molecular features are selected. By default, 0.
     Lab : bool, optional
@@ -66,20 +66,13 @@ def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False,
         The second DataFrame contains the selected features from the test dataset.
     """
     
-    if feature_selection == True:
-        if bestSelectedFeatures == 250: 
-            test = pd.read_csv("Data/select_features_full_test_set_250.csv")
-            train = pd.read_csv("Data/select_features_full_train_set_250.csv")
-            
-        elif bestSelectedFeatures == 100:
-            test = pd.read_csv("Data/select_features_full_test_set.csv")
-            train = pd.read_csv("Data/select_features_full_train_set.csv")
-    else:
-        train = pd.read_csv("Data/full_train_data.csv")
-        test = pd.read_csv("Data/full_test_data.csv")
+    # If no features are specified, return empty DataFrames
+    if not Lab and not ECFP and not cddd and not mol:
+        return pd.DataFrame(), pd.DataFrame()
+
+    train = pd.read_csv("Data/full_train_data.csv")
+    test = pd.read_csv("Data/full_test_data.csv")
     
-    imp = pd.read_csv("Features/permutation_importance.csv")
-        
     train_features = []
     test_features = []
         
@@ -94,26 +87,36 @@ def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False,
         ECFP_test = test.loc[:, 'ECFP_1':'ECFP_1024']
         test_features.append(ECFP_test)
     if cddd:
-        cddd_train = train.loc[:, 'cddd_1':'cddd_512']
-        train_features.append(cddd_train)
-        cddd_test = test.loc[:, 'cddd_1':'cddd_512']
-        test_features.append(cddd_test)
+        # if number is between 1 and 500, we select the most important features
+        if bestCddd == 100:
+            best_train = pd.read_csv("Data/select_features_full_train_set.csv")
+            best_test = pd.read_csv("Data/select_features_full_test_set.csv")
+            train_features.append(best_train.loc[:, 'first_selected_feature':])
+            test_features.append(best_test.loc[:, 'first_selected_feature':])
+        elif bestCddd == 250:
+            best_train = pd.read_csv("Data/select_features_full_train_set_250.csv")
+            best_test = pd.read_csv("Data/select_features_full_test_set_250.csv")
+            train_features.append(best_train.loc[:, 'first_selected_feature':])
+            test_features.append(best_test.loc[:, 'first_selected_feature':])
+        else:  
+            cddd_train = train.loc[:, 'cddd_1':'cddd_512']
+            train_features.append(cddd_train)
+            cddd_test = test.loc[:, 'cddd_1':'cddd_512']
+            test_features.append(cddd_test)
     if mol:
-        # if number is between 1 and 210, we select the number most important features
-        if bestFeatures > 0 and bestFeatures <= 210:
-            Lab_train = train[imp.loc[:bestFeatures-1, 'Feature']]
+        # if number is between 1 and 210, we select the most important features
+        if bestMol > 0 and bestMol <= 210:
+            imp = pd.read_csv("Features/permutation_importance.csv")
+            
+            Lab_train = train[imp.loc[:bestMol-1, 'Feature']]
             train_features.append(Lab_train)
-            Lab_test = test[imp.loc[:bestFeatures-1, 'Feature']]
+            Lab_test = test[imp.loc[:bestMol-1, 'Feature']]
             test_features.append(Lab_test)
         else:
             molecular_train = train.loc[:, 'MaxAbsEStateIndex':'fr_urea']
             train_features.append(molecular_train)
             molecular_test = test.loc[:, 'MaxAbsEStateIndex':'fr_urea']
             test_features.append(molecular_test)
-
-    if feature_selection: 
-        train_features.append(train.loc[:, 'first_selected_feature':])
-        test_features.append(test.loc[:, 'first_selected_feature':])
     
     return pd.concat(train_features, axis=1), pd.concat(test_features, axis=1)
 
