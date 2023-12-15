@@ -22,8 +22,7 @@ from tools import selectFeatures, getTarget, saveSubmission
 
 # Reproducibility
 seed_num = 42
-np.random.seed(seed_num)
-tf.random.set_seed(seed_num)
+keras.utils.set_random_seed(seed_num)
 
 
 X_set, X_test = selectFeatures(Lab=True, mol=True)
