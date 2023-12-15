@@ -36,7 +36,7 @@ def saveSubmission(predicted, name = "output"):
     submission.to_csv("Submissions/"+name+".csv", index=False)
     
     
-def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False, feature_selection = False):
+def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False, feature_selection = False, bestcddd = 1):
     """
     This function selects the specified features from the training and test datasets.
     The features are extracted from the enhanced dataset contained in the Data folder.
@@ -107,8 +107,8 @@ def selectFeatures(bestFeatures=0, Lab=False, ECFP=False, cddd=False, mol=False,
             test_features.append(molecular_test)
 
     if feature_selection: 
-        train_features.append(train.loc[:, 'first_selected_feature':])
-        test_features.append(test.loc[:, 'first_selected_feature':])
+        train_features.append(train.loc[:, 'first_selected_feature':-bestcddd])
+        test_features.append(test.loc[:, 'first_selected_feature':-bestcddd])
     
     return pd.concat(train_features, axis=1), pd.concat(test_features, axis=1)
 

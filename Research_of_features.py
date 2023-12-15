@@ -61,7 +61,7 @@ def findMostImportantFeatures(Features = 'cddd', number_of_important_features=10
 
     regressor = LinearRegression()
 
-    sfs = SequentialFeatureSelector(regressor, k_features=number_of_important_features, forward=True, scoring='neg_mean_squared_error', cv=5)
+    sfs = SequentialFeatureSelector(regressor, k_features=number_of_important_features, forward=True, scoring='neg_mean_squared_error', cv=5, verbose=1)
     sfs.fit(X_train, y_train)
 
     selected_features = sfs.k_feature_idx_
@@ -118,4 +118,4 @@ def findMostImportantFeatures(Features = 'cddd', number_of_important_features=10
 
 
 
-findMostImportantFeatures(Features='cddd', number_of_important_features=10)
+findMostImportantFeatures(Features='cddd', number_of_important_features=100)
