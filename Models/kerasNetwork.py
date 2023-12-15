@@ -22,12 +22,10 @@ from tools import selectFeatures, getTarget, plotHistory, saveSubmission
 
 
 # Reproducibility
-seed_num = 42
-np.random.seed(seed_num)
-tf.random.set_seed(seed_num)
+seed_num = 1
+keras.utils.set_random_seed(seed_num)
 
-
-X_set, X_test = selectFeatures(Lab=True, mol=True)
+X_set, X_test = selectFeatures(Lab=True, mol=True, feature_selection=True)
 y_set = getTarget()
 
 # Splitting test and train
@@ -79,7 +77,7 @@ history = model.fit(
     batch_size=128,
     validation_data=(X_val_std, y_val_std),
     verbose=2,
-    callbacks=[EarlyStopping(monitor='val_loss', patience=50, restore_best_weights=True)]
+    callbacks=[EarlyStopping(monitor='val_loss', patience=150, restore_best_weights=True)]
 )
 
 # Predictions for the validation set
@@ -105,4 +103,4 @@ y_pred = Yscaler.inverse_transform(y_pred).reshape(-1)
 
 # Transforming to array and saving
 y_pred = np.array(y_pred)
-saveSubmission(y_pred, 'KerasNetworks/kerasNetwork')
+saveSubmission(y_pred, 'KerasNetworks/kerasNetwork_eliseontop')
