@@ -88,6 +88,20 @@ def selectFeatures(Lab = False, ECFP = False, cddd = False, bestCddd = 0,  mol =
         train_features.append(ECFP_train)
         ECFP_test = test.loc[:, 'ECFP_1':'ECFP_1024']
         test_features.append(ECFP_test)
+    if mol:
+        # if number is between 1 and 210, we select the most important features
+        if bestMol > 0 and bestMol <= 210:
+            imp = pd.read_csv("Features/permutation_importance.csv")
+            
+            Lab_train = train[imp.loc[:bestMol-1, 'Feature']]
+            train_features.append(Lab_train)
+            Lab_test = test[imp.loc[:bestMol-1, 'Feature']]
+            test_features.append(Lab_test)
+        else:
+            molecular_train = train.loc[:, 'MaxAbsEStateIndex':'fr_urea']
+            train_features.append(molecular_train)
+            molecular_test = test.loc[:, 'MaxAbsEStateIndex':'fr_urea']
+            test_features.append(molecular_test)
     if cddd:
         # if number is between 1 and 500, we select the most important features
         if bestCddd > 0 and bestCddd <= 500:
@@ -105,20 +119,7 @@ def selectFeatures(Lab = False, ECFP = False, cddd = False, bestCddd = 0,  mol =
                 cddd_imp = pd.read_csv("Features/cddd_importance.csv")
                 train_features.append(train.loc[:, cddd_imp.loc[:bestCddd-1, 'Feature']])
                 test_features.append(test.loc[:, cddd_imp.loc[:bestCddd-1, 'Feature']])
-    if mol:
-        # if number is between 1 and 210, we select the most important features
-        if bestMol > 0 and bestMol <= 210:
-            imp = pd.read_csv("Features/permutation_importance.csv")
-            
-            Lab_train = train[imp.loc[:bestMol-1, 'Feature']]
-            train_features.append(Lab_train)
-            Lab_test = test[imp.loc[:bestMol-1, 'Feature']]
-            test_features.append(Lab_test)
-        else:
-            molecular_train = train.loc[:, 'MaxAbsEStateIndex':'fr_urea']
-            train_features.append(molecular_train)
-            molecular_test = test.loc[:, 'MaxAbsEStateIndex':'fr_urea']
-            test_features.append(molecular_test)
+
     
     return pd.concat(train_features, axis=1), pd.concat(test_features, axis=1)
 
