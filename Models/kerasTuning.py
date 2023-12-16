@@ -10,6 +10,7 @@ import tensorflow as tf
 import keras
 from keras import layers
 from keras_tuner import RandomSearch
+from keras_tuner import BayesianOptimization
 from keras.callbacks import EarlyStopping
 from keras.losses import mean_squared_error
 
@@ -21,13 +22,13 @@ from tools import selectFeatures, getTarget, saveSubmission
 
 
 # Reproducibility
-seed_num = 42
+seed_num = 1
 keras.utils.set_random_seed(seed_num)
 
-project_name = 'cddd_decay'
+project_name = 'cddd_bayesian_full'
 
 
-X_set, X_test = selectFeatures(Lab=True, mol=True, feature_selection=True)
+X_set, X_test = selectFeatures(Lab=True, mol=True, cddd=True, bestCddd=250)
 y_set = getTarget()
 
 # Splitting test and train
@@ -56,7 +57,7 @@ def build_model_tunned(hp):
     for i in range(hp.Int('num_layers', 2, 10)):
         model.add(layers.Dense(units=hp.Int('units_' + str(i),
                                             min_value=128,
-                                            max_value=512,
+                                            max_value=1024,
                                             step=32),
                                activation='relu'))
     model.add(layers.Dense(1))
@@ -64,19 +65,19 @@ def build_model_tunned(hp):
     
     model.compile(
         optimizer=keras.optimizers.AdamW(
-            learning_rate = hp.Float('learning_rate', min_value=1e-4, max_value=1e-2, sampling='LOG', default=1e-3),
-            weight_decay = hp.Float('weight_decay', min_value=1e-4, max_value=1e-2, sampling='LOG', default=1e-4)
+            learning_rate = 0.0016,
+            weight_decay = 0.004
         ),
         loss="mean_squared_error",
     )
     return model
 
-tuner = RandomSearch(
+tuner = BayesianOptimization(
     build_model_tunned,
     objective='val_loss',
-    max_trials=10,
-    executions_per_trial=3,
-    overwrite=True,
+    max_trials=50,
+    seed = seed_num,
+    overwrite=False,
     directory='hptuning/'+project_name,
     project_name=project_name
 )
@@ -84,15 +85,15 @@ tuner = RandomSearch(
 tuner.search_space_summary()
 
 tuner.search(X_std, y_std,
-             epochs=50,
+             epochs=100,
              validation_data=(X_val_std, y_val_std),
-             callbacks=[EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)])
+             callbacks=[EarlyStopping(monitor='val_loss', patience=50, restore_best_weights=True)])
 
 best_model = tuner.get_best_models(num_models=1)[0]
 best_model.summary()
 
 
-best_model.fit(X_std, y_std, epochs=1000, validation_data=(X_val_std, y_val_std), callbacks=[EarlyStopping(monitor='val_loss', patience=50, restore_best_weights=True)])
+best_model.fit(X_std, y_std, epochs=1000, batch_size=70 ,validation_data=(X_val_std, y_val_std), callbacks=[EarlyStopping(monitor='val_loss', patience=150, restore_best_weights=True)])
 
 # Predictions for the validation set
 y_pred_val = best_model.predict(X_val_std)
