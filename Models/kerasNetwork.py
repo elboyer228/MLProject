@@ -60,22 +60,22 @@ def kerasNetwork(X_set, X_test, y_set, seed_num=1, batch_size=128, epochs=1000, 
         return model
 
     model = build_model()
-    model.summary()
+    model.summary() if verbose else None
     history = model.fit(
         X_std,
         y_std,
         epochs=epochs,
         batch_size=batch_size,
         validation_data=(X_val_std, y_val_std),
-        verbose=1,
+        verbose=verbose,
         callbacks=[EarlyStopping(monitor='val_loss', patience=patience, restore_best_weights=True)]
     )
 
     # Predictions for the validation set
-    y_pred_val = model.predict(X_val_std)
+    y_pred_val = model.predict(X_val_std, verbose=verbose)
     y_pred_val = Yscaler.inverse_transform(y_pred_val).reshape(-1)
 
-    y_pred_train = model.predict(X_std)
+    y_pred_train = model.predict(X_std, verbose=verbose)
     y_pred_train = Yscaler.inverse_transform(y_pred_train).reshape(-1)
 
     # Compute mean squared error
@@ -83,10 +83,10 @@ def kerasNetwork(X_set, X_test, y_set, seed_num=1, batch_size=128, epochs=1000, 
     loss = mean_squared_error(y_train, y_pred_train)
 
     # Inverse transform the losses and print
-    print(f"Train loss : {loss}, Validation loss: {val_loss}")
+    print(f"Train loss : {loss}, Validation loss: {val_loss}") if verbose else None
 
     # Predictions for the test set
-    y_pred = model.predict(X_test_std)
+    y_pred = model.predict(X_test_std, verbose=verbose)
     y_pred = Yscaler.inverse_transform(y_pred).reshape(-1)
 
     # Transforming to array and saving
@@ -109,3 +109,94 @@ def kerasNetwork(X_set, X_test, y_set, seed_num=1, batch_size=128, epochs=1000, 
 
 # Second best model (Validation loss: 0.18084)
 # kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestCddd=100), getTarget(), batch_size=128, name="cddd_100")
+
+
+
+
+
+
+
+
+
+def bestMolGraph():
+    # Graphing effect of bestMol on validation loss
+    bestMol = 0
+    bestValLoss = 100
+    val_losses = []
+    mols = list(range(1, 211, 10))
+
+    for i in tqdm(mols):
+        model, history, val_loss = kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestMol=i, bestCddd=100), getTarget(), batch_size=128, verbose=False)
+        val_losses.append(val_loss)
+        if val_loss < bestValLoss:
+            bestValLoss = val_loss
+            bestMol = i
+            print(f"Best number of molecular features: {bestMol}, Validation loss: {bestValLoss}")
+
+    print(f"Best number of molecular features: {bestMol}, Validation loss: {bestValLoss}")
+
+    # Plotting the validation losses
+    plt.figure(figsize=(10, 6))
+    plt.plot(mols, val_losses, marker='o')
+    plt.title('Validation loss vs Number of molecular features')
+    plt.xlabel('Number of molecular features')
+    plt.ylabel('Validation loss')
+    plt.grid(True)
+    plt.show()
+
+
+def bestCdddGraph():
+    # Graphing effect of bestCddd on validation loss
+    bestCddd = 0
+    bestValLoss = 100
+    val_losses = []
+    cddds = list(range(10, 251, 10))
+
+    for i in tqdm(cddds):
+        model, history, val_loss = kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestCddd=i), getTarget(), name=i, batch_size=128, verbose=False,)
+        val_losses.append(val_loss)
+        if val_loss < bestValLoss:
+            bestValLoss = val_loss
+            bestCddd = i
+            print(f"Best number of CDDD features: {bestCddd}, Validation loss: {bestValLoss}")
+
+    print(f"Best number of CDDD features: {bestCddd}, Validation loss: {bestValLoss}")
+
+    # Plotting the validation losses
+    plt.figure(figsize=(10, 6))
+    plt.plot(cddds, val_losses, marker='o')
+    plt.title('Validation loss vs Number of CDDD features')
+    plt.xlabel('Number of CDDD features')
+    plt.ylabel('Validation loss')
+    plt.grid(True)
+    plt.show()
+    
+    
+# Graph the effect of patience on validation loss
+def patienceGraph():
+    bestPatience = 0
+    bestValLoss = 100
+    val_losses = []
+    patiences = list(range(10, 501, 50))
+
+    for i in tqdm(patiences):
+        model, history, val_loss = kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestCddd=100), getTarget(), batch_size=128, patience=i, verbose=False)
+        val_losses.append(val_loss)
+        if val_loss < bestValLoss:
+            bestValLoss = val_loss
+            bestPatience = i
+            print(f"Best patience: {bestPatience}, Validation loss: {bestValLoss}")
+
+    print(f"Best patience: {bestPatience}, Validation loss: {bestValLoss}")
+
+    # Plotting the validation losses
+    plt.figure(figsize=(10, 6))
+    plt.plot(patiences, val_losses, marker='o')
+    plt.title('Validation loss vs Patience')
+    plt.xlabel('Patience')
+    plt.ylabel('Validation loss')
+    plt.grid(True)
+    plt.show()
+    
+    
+patienceGraph()
