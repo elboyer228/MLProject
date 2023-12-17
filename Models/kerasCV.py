@@ -35,16 +35,8 @@ patience = 150
 num_folds = 5
 
 # Load data
-X_set, X_test = selectFeatures(Lab=True, mol=True, cddd=True, bestCddd=100)
+X_set, X_test = selectFeatures(Lab=True, mol=True, cddd=True, bestCddd=250)
 y_set = getTarget()
-
-
-# Normalize data
-Xscaler = StandardScaler()
-X_std = Xscaler.fit_transform(X_set)
-X_test_std = Xscaler.transform(X_test)
-Yscaler = StandardScaler()
-y_std = Yscaler.fit_transform(y_set.values.reshape(-1, 1))
 
 # Define per-fold score containers
 loss_per_fold = []
@@ -54,7 +46,22 @@ kfold = KFold(n_splits=num_folds, shuffle=True, random_state=seed_num)
 
 # K-fold Cross Validation model evaluation
 fold_no = 1
-for train, test in kfold.split(X_std, y_std):
+for train, test in kfold.split(X_set, y_set):
+    
+    # Normalize data
+    Xscaler = StandardScaler()
+    X_train_std = Xscaler.fit_transform(X_set.iloc[train])
+    X_test_std = Xscaler.transform(X_set.iloc[test])
+
+    # Split the training data into training and validation sets
+    X_train_std, X_val_std, y_train, y_val = train_test_split(
+        X_train_std, y_set.iloc[train], test_size=0.2, random_state=seed_num)
+
+    # Normalize target data
+    Yscaler = StandardScaler()
+    y_train_std = Yscaler.fit_transform(y_train.values.reshape(-1, 1))
+    y_val_std = Yscaler.transform(y_val.values.reshape(-1, 1))
+    y_test_std = Yscaler.transform(y_set.iloc[test].values.reshape(-1, 1))
 
     # Define the model architecture
     model = keras.Sequential([
@@ -81,18 +88,18 @@ for train, test in kfold.split(X_std, y_std):
     print(f'Training for fold {fold_no} ...')
 
     # Fit data to model
-    history = model.fit(X_std[train], y_std[train],
+    history = model.fit(X_train_std, y_train_std,
                 batch_size=batch_size,
                 epochs=no_epochs,
                 verbose=verbosity,
                 callbacks=[EarlyStopping(monitor='val_loss', patience=patience)],
-                validation_data=(X_std[test], y_std[test])
+                validation_data=(X_val_std, y_val_std)
                 )
 
     # Generate generalization metrics
-    y_pred = model.predict(X_std[test], verbose = 0)
+    y_pred = model.predict(X_test_std, verbose = 0)
     y_pred = Yscaler.inverse_transform(y_pred)
-    y_values = Yscaler.inverse_transform(y_std[test])
+    y_values = Yscaler.inverse_transform(y_test_std)
     
     loss_values = mean_squared_error(y_values, y_pred)
     loss = np.mean(loss_values)
