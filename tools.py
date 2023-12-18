@@ -36,7 +36,7 @@ def saveSubmission(predicted, name = "output"):
     submission.to_csv("Submissions/"+name+".csv", index=False)
     
     
-def selectFeatures(Lab = False, ECFP = False, bestECFP = 0, cddd = False, bestCddd = 0,  mol = False, bestMol = 0):
+def selectFeatures(Lab = False, ECFP = False, bestECFP = 0, cddd = False, bestCddd = 0, mol = False, bestMol = 0):
     """
     This function selects the specified features from the training and test datasets.
     The features are extracted from the enhanced dataset contained in the Data folder.
@@ -111,7 +111,7 @@ def selectFeatures(Lab = False, ECFP = False, bestECFP = 0, cddd = False, bestCd
             test_features.append(molecular_test)
     if cddd:
         # if number is between 1 and 500, we select the most important features
-        if bestCddd > 0 and bestCddd <= 500:
+        if bestCddd >= 0 and bestCddd <= 512:
             if bestCddd == 100:
                 best_train = pd.read_csv("Data/select_features_full_train_set.csv")
                 best_test = pd.read_csv("Data/select_features_full_test_set.csv")
@@ -122,6 +122,11 @@ def selectFeatures(Lab = False, ECFP = False, bestECFP = 0, cddd = False, bestCd
                 best_test = pd.read_csv("Data/select_features_full_test_set_250.csv")
                 train_features.append(best_train.loc[:, 'first_selected_feature':])
                 test_features.append(best_test.loc[:, 'first_selected_feature':])
+            elif bestCddd == 0:
+                cddd_train = train.loc[:, 'cddd_1':'cddd_512']
+                train_features.append(cddd_train)
+                cddd_test = test.loc[:, 'cddd_1':'cddd_512']
+                test_features.append(cddd_test)
             else:
                 cddd_imp = pd.read_csv("Features/cddd_permutation_importance.csv")
                 train_features.append(train.loc[:, cddd_imp.loc[:bestCddd-1, 'Feature']])
