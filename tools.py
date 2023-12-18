@@ -36,7 +36,7 @@ def saveSubmission(predicted, name = "output"):
     submission.to_csv("Submissions/"+name+".csv", index=False)
     
     
-def selectFeatures(Lab = False, ECFP = False, cddd = False, bestCddd = 0,  mol = False, bestMol = 0):
+def selectFeatures(Lab = False, ECFP = False, bestECFP = 0, cddd = False, bestCddd = 0,  mol = False, bestMol = 0):
     """
     This function selects the specified features from the training and test datasets.
     The features are extracted from the enhanced dataset contained in the Data folder.
@@ -84,10 +84,17 @@ def selectFeatures(Lab = False, ECFP = False, cddd = False, bestCddd = 0,  mol =
         Lab_test = test.loc[:, 'Lab_1':'Lab_24']
         test_features.append(Lab_test)
     if ECFP:
-        ECFP_train = train.loc[:, 'ECFP_1':'ECFP_1024']
-        train_features.append(ECFP_train)
-        ECFP_test = test.loc[:, 'ECFP_1':'ECFP_1024']
-        test_features.append(ECFP_test)
+        if bestECFP > 0 and bestECFP <= 1024:
+            imp = pd.read_csv("Features/ECFP_permutation_importance.csv")
+            ECFP_train = train.loc[:, imp.loc[:bestECFP-1, 'Feature']]
+            train_features.append(ECFP_train)
+            ECFP_test = test.loc[:, imp.loc[:bestECFP-1, 'Feature']]
+            test_features.append(ECFP_test)
+        else:
+            ECFP_train = train.loc[:, 'ECFP_1':'ECFP_1024']
+            train_features.append(ECFP_train)
+            ECFP_test = test.loc[:, 'ECFP_1':'ECFP_1024']
+            test_features.append(ECFP_test)
     if mol:
         # if number is between 1 and 210, we select the most important features
         if bestMol > 0 and bestMol <= 210:
@@ -116,7 +123,7 @@ def selectFeatures(Lab = False, ECFP = False, cddd = False, bestCddd = 0,  mol =
                 train_features.append(best_train.loc[:, 'first_selected_feature':])
                 test_features.append(best_test.loc[:, 'first_selected_feature':])
             else:
-                cddd_imp = pd.read_csv("Features/cddd_importance.csv")
+                cddd_imp = pd.read_csv("Features/cddd_permutation_importance.csv")
                 train_features.append(train.loc[:, cddd_imp.loc[:bestCddd-1, 'Feature']])
                 test_features.append(test.loc[:, cddd_imp.loc[:bestCddd-1, 'Feature']])
 
