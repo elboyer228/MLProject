@@ -110,28 +110,26 @@ def selectFeatures(Lab = False, ECFP = False, bestECFP = 0, cddd = False, bestCd
             molecular_test = test.loc[:, 'MaxAbsEStateIndex':'fr_urea']
             test_features.append(molecular_test)
     if cddd:
-        # if number is between 1 and 500, we select the most important features
-        if bestCddd >= 0 and bestCddd <= 512:
-            if bestCddd == 100:
-                best_train = pd.read_csv("Data/select_features_full_train_set.csv")
-                best_test = pd.read_csv("Data/select_features_full_test_set.csv")
+        if bestCddd == 0:
+            cddd_train = train.loc[:, 'cddd_1':'cddd_512']
+            train_features.append(cddd_train)
+            cddd_test = test.loc[:, 'cddd_1':'cddd_512']
+            test_features.append(cddd_test)
+        elif bestCddd > 0 and bestCddd <= 512:
+            # if number is between 1 and 500, we select the most important features
+            ## try to open if file f"Data/select_features_full_train_set_{bestCdd}.csv", if it doesn't use permutation importance
+            try:
+                # Try to open the file
+                best_train = pd.read_csv("Data/Selected/select_features_full_train_set_"+str(bestCddd)+".csv")
+                best_test = pd.read_csv("Data/Selected/select_features_full_test_set_"+str(bestCddd)+".csv")
                 train_features.append(best_train.loc[:, 'first_selected_feature':])
                 test_features.append(best_test.loc[:, 'first_selected_feature':])
-            elif bestCddd == 250:
-                best_train = pd.read_csv("Data/select_features_full_train_set_250.csv")
-                best_test = pd.read_csv("Data/select_features_full_test_set_250.csv")
-                train_features.append(best_train.loc[:, 'first_selected_feature':])
-                test_features.append(best_test.loc[:, 'first_selected_feature':])
-            elif bestCddd == 0:
-                cddd_train = train.loc[:, 'cddd_1':'cddd_512']
-                train_features.append(cddd_train)
-                cddd_test = test.loc[:, 'cddd_1':'cddd_512']
-                test_features.append(cddd_test)
-            else:
+            except FileNotFoundError:
+                # If the file doesn't exist, use permutation importance
+                print(f"Computations not done yet for {bestCddd} features. Using permutation importance instead.")
                 cddd_imp = pd.read_csv("Features/cddd_permutation_importance.csv")
                 train_features.append(train.loc[:, cddd_imp.loc[:bestCddd-1, 'Feature']])
                 test_features.append(test.loc[:, cddd_imp.loc[:bestCddd-1, 'Feature']])
-
     
     return pd.concat(train_features, axis=1), pd.concat(test_features, axis=1)
 
