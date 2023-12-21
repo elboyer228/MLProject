@@ -13,21 +13,13 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-# Reproducibility
-seed_num = 42
+
+seed_num = 1
 
 
-def LinearRegressionModel(num = 0, type = "mol", plot = False, export = False):
+def LinearRegressionModel(Lab = True, mol = True, cddd = True, ECFP = False, bestCddd = 100, export = False, plot = False, name_submission = "lastSubmission"):
     
-    if type == "mol":
-        X_set, X_test = selectFeatures(Lab=True, mol=True, bestFeatures=num)
-    elif type == "cddd":
-        X_set, X_test = selectFeatures(Lab=True, cddd=True)
-    elif type == "ECFP":
-        X_set, X_test = selectFeatures(Lab=True, ECFP=True)
-    elif type == "both":
-        X_set, X_test = selectFeatures(cddd=True, ECFP=True)
-
+    X_set, X_test = selectFeatures(Lab=Lab, mol=mol, cddd=cddd, ECFP=ECFP, bestCddd=bestCddd)
     y_set = getTarget()
     
     # Splitting test and train
@@ -35,7 +27,7 @@ def LinearRegressionModel(num = 0, type = "mol", plot = False, export = False):
     X_train, X_val, y_train, y_val = train_test_split(
     X_set,
     y_set,
-    test_size=0.20,
+    test_size=0.15,
     random_state=seed_num
 )
 
@@ -57,17 +49,16 @@ def LinearRegressionModel(num = 0, type = "mol", plot = False, export = False):
         plt.scatter(y_val, predicted_val, s=2, label="Linear Regression")
         x = np.linspace(min(y_val), max(y_val), 100) 
         plt.plot(x, x, color='black', linestyle='--') # Plot identity line
-        plt.title("Linear Regression (" + type + ") - Validation test")
+        plt.title("Linear Regression - Validation test")
         plt.xlabel("true values")
         plt.ylabel("predicted values")
         plt.legend()
         plt.text(0.1,0.9,f"R2 Score: {r2}\nRMSE: {rmse}\nMSE: {mse}\nMAE: {mae}",transform=plt.gca().transAxes,verticalalignment='top')
-        plt.savefig('Visualization_data/LinearRegression_' + type + '.png', format='png')
+        plt.savefig('Visualization_data/LinearRegression_.png', format='png')
         plt.show()
-
     if export:
         predicted = model.predict(X_test)
-        saveSubmission(predicted, "LinearRegression/LinearRegression_" + type)
+        saveSubmission(predicted, "LinearRegression/LinearRegression_" + name_submission + ".csv")
     
     return mse, r2
 
@@ -89,4 +80,4 @@ def plotFeaturesEv():
     plt.legend()
     plt.savefig("Visualization_data/LinearRegression_comparaison.png")
 
-LinearRegressionModel(num=0, type="mol", plot=True, export=True)
+LinearRegressionModel(Lab=True, mol=True, cddd=True, ECFP=False, bestCddd=100, export=False, plot=True, name_submission='LabMolCdddDataset')
