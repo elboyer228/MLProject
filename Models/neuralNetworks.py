@@ -10,14 +10,14 @@ from tqdm import tqdm
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, r2_score
 import torch
 
 from tools import selectFeatures, getTarget, plotHistory, saveSubmission
 
 
 
-def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150, lr=0.0001, patience=50, verbose=True, export=False, name="NeuralNetwork"):
+def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150, lr=0.0001, patience=50, plotHistory = False, verbose=True, export=False, name="NeuralNetwork"):
     """
     This function trains a basic neural network model on the given dataset.
 
@@ -39,6 +39,8 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
         The learning rate for the optimizer, by default 0.0001.
     patience : int, optional
         The patience for early stopping, by default 50.
+    plotHistory : bool, optional
+        If True, plots the training and validation loss, by default False.
     verbose : bool, optional
         If True, prints out the loss for each epoch, by default True.
     export : bool, optional
@@ -64,14 +66,7 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
     g.manual_seed(seed_num)
 
 
-    # Splitting test and train
-
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_set,
-        y_set,
-        test_size=0.20,
-        random_state=seed_num
-    )
+    X_train, X_val, y_train, y_val = train_test_split(X_set,y_set,test_size=0.20,random_state=seed_num)
 
     # Standardize data
     Xscaler = StandardScaler()
@@ -93,33 +88,36 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
         torch.utils.data.TensorDataset(X_ten, y_ten),
         batch_size = batch_size,
         shuffle = True,
-        worker_init_fn = seed_worker, # for reproducibility
-        generator = g # for reproducibility
+        worker_init_fn = seed_worker, 
+        generator = g 
     )
 
     # Setting up the model
     class NeuralNet(torch.nn.Module):
-        def __init__(self):
+        def __init__(self, input_size=334):  # Set default input size to 334
             super(NeuralNet, self).__init__()
             self.layers = torch.nn.Sequential(
-                torch.nn.Linear(X_set.shape[1], 128),
-                torch.nn.Dropout(0.5),
+                torch.nn.Linear(input_size, 416),  # Use input_size here
                 torch.nn.ReLU(),
-                torch.nn.Linear(128, 1),
+                torch.nn.Linear(416, 352),
+                torch.nn.ReLU(),
+                torch.nn.Linear(352, 288),
+                torch.nn.ReLU(),
+                torch.nn.Linear(288, 416),
+                torch.nn.ReLU(),
+                torch.nn.Linear(416, 1),
             )
         def forward(self, x):
             return self.layers(x)
         
 
-    # Initialize best validation loss as infinity
+    
     best_val_loss = float('inf')
-    # Initialize patience counter
     patience_counter = 0
-    # Initialize history dictionary
     history = {'train_loss': [], 'val_loss': []}
 
     model = NeuralNet()
-    loss_func = torch.nn.MSELoss()
+    loss_func = torch.nn.HuberLoss() 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
 
     # Training
@@ -144,11 +142,11 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
         if verbose and epoch % 10 == 0:
             print(f'Epoch {epoch}/{epochs} ({round((epoch/epochs)*100, 1)}%)', f'Training Loss: {loss.item()}', f"Validation loss : {val_loss}", end='\r')
         
-        # History
+        
         history['train_loss'].append(loss.item())
         history['val_loss'].append(val_loss)
             
-        # Check for early stopping
+        # Early stopping if the validation loss doesn't improve for a certain number of epochs
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             patience_counter = 0
@@ -161,7 +159,7 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
                 break
 
 
-    # Evaluation and computation of the train and test losss
+    # Evaluation
     model.eval()
     with torch.no_grad():
         
@@ -178,38 +176,26 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
         train_loss = loss_func(torch.from_numpy(pred_train), torch.from_numpy(y_train))
         val_loss = loss_func(torch.from_numpy(pred_val), torch.from_numpy(y_val))
 
-        
+        r2 = r2_score(y_val, pred_val)
+        print(f"R^2 score for validation set: {r2}")
         # Prediction on test set
         if export:
             predictions = Yscaler.inverse_transform(model(X_test_ten).detach().numpy())
             saveSubmission(predictions.flatten(), name)
-            
-    return history, train_loss, val_loss
+        
+        if plotHistory: 
+            plotHistory(history)
+
+    return train_loss, val_loss
 
 
 
-
-
-X_set, X_test = selectFeatures(Lab=True, mol=True) 
+X_set, X_test = selectFeatures(Lab=True, mol=True, cddd=True, ECFP=False, bestCddd=100) 
 y_set = getTarget()
 
-history, train_loss, val_loss = neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=1500, lr=0.00023, patience=50, verbose=False, export=False, name="NeuralNetwork_LabMol")
+train_loss, val_loss = neuralNetworks(X_set, X_test, y_set, seed_num=1, batch_size=128, epochs=1500, lr=0.00023, patience=150, plotHistory = False, verbose=False, export=False, name="NeuralNetwork_LabMol")
 print(f"Train loss : {train_loss}, Validation loss: {val_loss}")
-plotHistory(history)
 
-# Plot different learning rates
-def plotLR():
-    learning_rates = np.linspace(0.00001, 0.001, 10)
-    train_losses = []
-    validation_losses = []
-    for lr in learning_rates:
-        train_loss, validation_loss = neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=1500, lr=lr, patience=50, verbose=False, export=False, name="NeuralNetwork")
-        train_losses.append(train_loss)
-        validation_losses.append(validation_loss)
-        print(f"Learning rate: {lr}, Train loss : {train_losses[-1]}, Validation loss: {validation_losses[-1]}")
-        
-    plt.plot(learning_rates, validation_losses)
-    plt.xlabel("Learning rate")
-    plt.ylabel("Validation loss")
-    plt.xscale("log")
-    plt.show()
+# These settings gave the best results: R^2 score for validation set: 0.9868045981517677
+# Train loss : 0.0007032371941022575, Validation loss: 0.08734024316072464
+# Kaggle score: 0.1913
