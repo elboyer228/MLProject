@@ -59,7 +59,7 @@ plt.ylabel("Predicted RT")
 plt.title("Stoca Gradient Descent Regression")
 plt.legend()
 plt.text(0.1,0.9,f"R2 Score: {r2_score(y_val, predicted_X_val)}\nRMSE: {rmse}\nMSE: {mse}\nMAE: {mae}",transform=plt.gca().transAxes,verticalalignment='top')
-plt.savefig('Visualization_data/GradientDescentLab.png', format='png')
+plt.savefig('Visualization/GradientDescentLab.png', format='png')
 
 
 predicted_X_test = reg.predict(X_test)

@@ -18,6 +18,33 @@ seed_num = 1
 
 
 def LinearRegressionModel(Lab = True, mol = True, cddd = True, ECFP = False, bestCddd = 100, export = False, plot = False, name_submission = "lastSubmission"):
+    """
+    Builds, trains, and evaluates a linear regression model.
+
+    Parameters
+    ----------
+    Lab : bool, optional
+        Whether to include Lab features in the model, by default True
+    mol : bool, optional
+        Whether to include mol features in the model, by default True
+    cddd : bool, optional
+        Whether to include cddd features in the model, by default True
+    ECFP : bool, optional
+        Whether to include ECFP features in the model, by default False
+    bestCddd : int, optional
+        The number of best cddd features to include in the model, by default 100
+    export : bool, optional
+        Whether to export the final predictions, by default False
+    plot : bool, optional
+        Whether to plot the validation results, by default False
+    name_submission : str, optional
+        The name of the submission file, by default "lastSubmission"
+
+    Returns
+    -------
+    tuple
+        A tuple containing the mean squared error and the R2 score of the model.
+    """
     
     X_set, X_test = selectFeatures(Lab=Lab, mol=mol, cddd=cddd, ECFP=ECFP, bestCddd=bestCddd)
     y_set = getTarget()
@@ -54,7 +81,7 @@ def LinearRegressionModel(Lab = True, mol = True, cddd = True, ECFP = False, bes
         plt.ylabel("predicted values")
         plt.legend()
         plt.text(0.1,0.9,f"R2 Score: {r2}\nRMSE: {rmse}\nMSE: {mse}\nMAE: {mae}",transform=plt.gca().transAxes,verticalalignment='top')
-        plt.savefig('Visualization_data/LinearRegression_.png', format='png')
+        plt.savefig('Visualization/LinearRegression_.png', format='png')
         plt.show()
     if export:
         predicted = model.predict(X_test)
@@ -63,4 +90,4 @@ def LinearRegressionModel(Lab = True, mol = True, cddd = True, ECFP = False, bes
     return mse, r2
 
 
-LinearRegressionModel(Lab=True, mol=True, cddd=True, ECFP=False, bestCddd=100, export=False, plot=True, name_submission='LabMolCdddDataset')
+LinearRegressionModel(Lab=True, mol=True, cddd=True, ECFP=False, bestCddd=100, export=True, plot=False, name_submission='LabMolCdddDataset')

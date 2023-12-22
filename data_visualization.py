@@ -11,7 +11,7 @@ df['Compound'] = df['Compound'].str.strip()
 name_counts = df['Compound'].value_counts()
 repeated_compounds = name_counts[name_counts > 1]
 repeated_compounds_df = repeated_compounds.reset_index()
-repeated_compounds_df.to_csv('Visualization_data/Repeated_Compounds_table.csv', index=False)
+repeated_compounds_df.to_csv('Visualization/Repeated_Compounds_table.csv', index=False)
 
 #number of data from labs
 df['Lab'] = df['Lab'].str.strip()
@@ -23,7 +23,7 @@ plt.xlabel('Lab')
 plt.ylabel('Counts')
 plt.title('Counts of Molecules per Lab')
 plt.tight_layout()
-plt.savefig('Visualization_data/Lab_counts.png')
+plt.savefig('Visualization/Lab_counts.png')
 
 
 # analysis of the Retention time 
@@ -55,4 +55,4 @@ plt.xlabel('Retention Time')
 plt.ylabel('Probability')
 plt.title('Distribution of standardized and non-standardized retention times')
 plt.legend()
-plt.savefig('Visualization_data/RT_analysis.png')
+plt.savefig('Visualization/RT_analysis.png')
