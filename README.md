@@ -25,7 +25,7 @@ By leveraging machine learning techniques, we aim to develop accurate and reliab
 
 ## Authors
 
-* Elise Boyer ([@elboyer228](https://github.com/elboyer228))
+* Élise Boyer ([@elboyer228](https://github.com/elboyer228))
 * Johann Clausen ([@johanncc01](https://github.com/Johanncc01))
 
 ## Requirements
@@ -67,8 +67,7 @@ This will create a conda environment named `MLProject` with all the required pac
 - [`Viusalization`](Visualization): folder containing the visualization files
 
 ---
-- [`data_visualization.py`](data_visualization.py): file containing the functions used for the data visualization, used for analysing RT distribution and correlation between features/labs
-- [`graphs.py`](graphs.py): file containing the functions used for the visualization of the models results, such as the learning curves or parameter influence
+- [`graphs.py`](graphs.py): file containing the functions used for the visualization of the data and models results, such as the RT distribution or parameter influence
 - [`importance.py`](importance.py): file containing the functions used for the feature importance analysis, such as the permutation importance
 - [`MLProject.yml`](MLProject.yml): conda environment file
 - [`report.pdf`](report.pdf): report of the project, showing the different steps of the project and the results
@@ -111,4 +110,4 @@ Further details on the results can be found on the Kaggle competition page: http
 More details on the project and the process used can be found in the [`report.pdf`](report.pdf) file.
 
 ## Acknowledgements
-We would like to thank our professor and teaching assistants for their guidance and support throughout this project. 
+We would like to thank our professor and teaching assistants for their guidance and support throughout this project. 😊
