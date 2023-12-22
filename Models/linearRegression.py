@@ -27,7 +27,7 @@ def LinearRegressionModel(Lab = True, mol = True, cddd = True, ECFP = False, bes
     X_train, X_val, y_train, y_val = train_test_split(
     X_set,
     y_set,
-    test_size=0.15,
+    test_size=0.20,
     random_state=seed_num
 )
 
@@ -62,22 +62,5 @@ def LinearRegressionModel(Lab = True, mol = True, cddd = True, ECFP = False, bes
     
     return mse, r2
 
-def plotFeaturesEv():
-    plt.figure(figsize=(10,6))
-    mse_list = []
-    r2_list = []
-
-    for i in tqdm(range(210)):
-        mse, r2 = LinearRegressionModel(num=i)
-        mse_list.append(mse)
-        r2_list.append(r2)
-        
-    plt.plot(mse_list, label="mse (lower is better)")
-    plt.plot(r2_list, label="r2 (higher is better)")
-    plt.xlabel("nb of features")
-    plt.ylabel("error")
-    plt.title("Evolution of the error depending on the feature number (linear reg)")
-    plt.legend()
-    plt.savefig("Visualization_data/LinearRegression_comparaison.png")
 
 LinearRegressionModel(Lab=True, mol=True, cddd=True, ECFP=False, bestCddd=100, export=False, plot=True, name_submission='LabMolCdddDataset')
