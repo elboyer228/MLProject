@@ -4,7 +4,6 @@
 > Introduction to Machine Learning for bioengineers - BIO-322
 
 
-
 Liquid chromatography is a widely used method for detecting drugs in human tissues and biofluids. In this project, we aim to predict the retention time (RT) of drugs on different chromatography platforms, based on their chemical structure.
 
 In a liquid chromatography experiment, each drug is identified by its unique retention time. This parameter is influenced by the chemical properties of the drug as well as the specific configuration of the chromatography setup within a particular laboratory.
@@ -67,13 +66,12 @@ This will create a conda environment named `MLProject` with all the required pac
 - [`Viusalization`](Visualization): folder containing the visualization files
 
 ---
-- [`features.py`](features.py): file containing the functions used basic feature engineering (data cleaning, one-hot encoding, etc.). More advanced computations are done in the [`importance.py`](importance.py) and [`research_of_features.py`](research_of_features.py) files.
+- [`features.py`](features.py): file containing the functions used basic feature engineering (data cleaning, one-hot encoding, etc.). More advanced computations are done in the [`importance.py`](importance.py) file. This file also contains feature selection using Sequencial Feature Selection (SFS).
 - [`graphs.py`](graphs.py): file containing the functions used for the visualization of the data and models results, such as the RT distribution or parameter influence
 - [`importance.py`](importance.py): file containing the functions used for the feature importance analysis, such as the permutation importance
 - [`MLProject.yml`](MLProject.yml): conda environment file
 - [`report.pdf`](report.pdf): report of the project, showing the different steps of the project and the results
 - [`reproducibility.py`](reproducibility.py): file that must be run to check reproducibility of the results of the 2 selected submissions on kaggle
-- [`research_of_features.py`](research_of_features.py): file containing the functions used for the features analysis, such as the correlation between features and the selection of the best features
 - [`tools.py`](tools.py): file containing the helper function, such as the data loader `selectFeatures()` and the saving function `saveSubmission()`. These helped to select quickly the features (between ECFP, cddd, etc.) and save the submission files to the correct format for the kaggle competition.
 
 ## Execution

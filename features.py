@@ -123,6 +123,14 @@ train_data.to_csv("Data/full_train_data.csv", index=False)
 test_data.to_csv("Data/full_test_data.csv", index=False)
 
 
+
+
+
+
+
+
+############ New features selection ############
+
 seed_num = 30
 def clean_features(file_path = 'Features/train_properties.csv'):
     train_prop = pd.read_csv(file_path)
