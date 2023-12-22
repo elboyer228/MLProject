@@ -20,7 +20,7 @@ from sklearn.preprocessing import StandardScaler
 from tools import selectFeatures, getTarget, saveSubmission
 
 
-def kerasNetwork(X_set, X_test, y_set, seed_num=1, batch_size=128, epochs=1000, lr=0.0016, decay=0.004, patience=150, verbose=True, export=False, name="NeuralNetwork"):
+def kerasNetwork(X_set, X_test, y_set, model_structure = None, seed_num=1, batch_size=128, epochs=1000, lr=0.0016, decay=0.004, patience=150, verbose=True, export=False, name="NeuralNetwork"):
     # Reproducibility
     keras.utils.set_random_seed(seed_num)
 
@@ -41,16 +41,21 @@ def kerasNetwork(X_set, X_test, y_set, seed_num=1, batch_size=128, epochs=1000, 
     y_std = Yscaler.fit_transform(y_train.values.reshape(-1, 1))
     y_val_std = Yscaler.transform(y_val.values.reshape(-1, 1))
 
-    # Setting up the model
-    def build_model():
-        model = keras.Sequential([
-            keras.Input(shape=X_set.shape[1]),
+
+    if model_structure == None:
+        model_structure = [
             layers.Dense(416, activation='relu'),
             layers.Dense(352, activation='relu'),
             layers.Dense(288, activation='relu'),
             layers.Dense(416, activation='relu'),
             layers.Dense(1)
-        ])
+        ]
+
+    # Setting up the model
+    def build_model():
+        model_structure.insert(0, keras.Input(shape=X_set.shape[1]))
+        
+        model = keras.Sequential(model_structure)
 
         model.compile(
             optimizer=keras.optimizers.AdamW(learning_rate=lr, weight_decay=decay),
@@ -94,7 +99,7 @@ def kerasNetwork(X_set, X_test, y_set, seed_num=1, batch_size=128, epochs=1000, 
     if export:
         saveSubmission(y_pred, f'KerasNetworks/{name}')
 
-    return model, history, val_loss
+    return model, history, val_loss,
 
 
 
@@ -105,15 +110,10 @@ def kerasNetwork(X_set, X_test, y_set, seed_num=1, batch_size=128, epochs=1000, 
 ############# Confirmed reproducibility #############
 
 # Best model yet (Validation loss: 0.16014881432056427)
-# kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestCddd=100), getTarget(), batch_size=70, name="cddd_little_batch")
+kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestCddd=100), getTarget(), batch_size=70, name="cddd_little_batch")
 
 # Second best model (Validation loss: 0.18084)
 # kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestCddd=100), getTarget(), batch_size=128, name="cddd_100")
-
-
-
-
-
 
 
 
@@ -199,4 +199,3 @@ def patienceGraph():
     plt.show()
     
     
-patienceGraph()
