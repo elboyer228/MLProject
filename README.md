@@ -67,6 +67,7 @@ This will create a conda environment named `MLProject` with all the required pac
 - [`Viusalization`](Visualization): folder containing the visualization files
 
 ---
+- [`features.py`](features.py): file containing the functions used basic feature engineering (data cleaning, one-hot encoding, etc.). More advanced computations are done in the [`importance.py`](importance.py) and [`research_of_features.py`](research_of_features.py) files.
 - [`graphs.py`](graphs.py): file containing the functions used for the visualization of the data and models results, such as the RT distribution or parameter influence
 - [`importance.py`](importance.py): file containing the functions used for the feature importance analysis, such as the permutation importance
 - [`MLProject.yml`](MLProject.yml): conda environment file
