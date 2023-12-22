@@ -49,7 +49,7 @@ def RidgeRegressionModel(seed_num = 1, Lab = True, mol = True, cddd = True, ECFP
                 plt.ylabel("predicted values")
                 plt.legend()
                 plt.text(0.1,0.9,f"R2 Score: {r2}\nRMSE: {rmse}\nMSE: {mse}\nMAE: {mae}, \nalpha: {best_params['alpha']}",transform=plt.gca().transAxes,verticalalignment='top')
-                plt.savefig('Visualization_data/RidgeRegression.png', format='png')
+                plt.savefig('Visualization/RidgeRegression.png', format='png')
                 plt.show()
 
         if export:

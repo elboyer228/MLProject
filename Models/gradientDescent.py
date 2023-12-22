@@ -61,7 +61,7 @@ def StochGradient(seed_num = 1, Lab = True, mol = True, cddd = True, ECFP = Fals
         plt.title("Stoca Gradient Descent Regression")
         plt.legend()
         plt.text(0.1,0.9,f"R2 Score: {r2_score(y_val, predicted_X_val)}\nRMSE: {rmse}\nMSE: {mse}\nMAE: {mae}",transform=plt.gca().transAxes,verticalalignment='top')
-        plt.savefig('Visualization_data/GradientDescentLab.png', format='png')
+        plt.savefig('Visualization/GradientDescentLab.png', format='png')
         plt.show()
 
     predicted_X_test = pipeline.predict(X_test)
