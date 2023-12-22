@@ -48,17 +48,19 @@ conda env create -f MLProject.yml
 ```
 This will create a conda environment named `MLProject` with all the required packages.
 
-
-
 ## Files
 - [`Data`](Data): folder containing the training and tests sets used for the project
 - [`Features`](Features): folder containing the features analysis files, such as importance and correlation
 - [`Models`](Models): folder containing all models functions used for the project
     
     The main models are:
-    - jkfdsj
-    - klfdsj
-    - lkjfsdl
+    - [`linearRegression.py`](Models/linearRegression.py): implements a simple linear regression model
+    - [`ridgeRegression.py`](Models/ridgeRegression.py): implements a ridge regression model
+    - [`gradientDescent.py`](Models/gradientDescent.py): implements a stochastic gradient descent model
+    - [`neuralNetwork.py`](Models/neuralNetwork.py): implements a neural network model using Pytorch
+    - [`kerasNetwork.py`](Models/kerasNetwork.py): implements a neural network model using Keras. Our most performant submissions were obtained using this model and hyperparameter tuning. Tuning files are [`kerasTuning.py`](Models/kerasTuning.py) and [`kerasCVTuner.py`](Models/kerasCVTuner.py). 
+
+    There are also implementations of cross-validations in the [`kerasCV.py`](Models/kerasCV.py) file.
 
 
 - [`Submissions`](Submissions): folder containing the submissions files for the kaggle competition
@@ -69,7 +71,8 @@ This will create a conda environment named `MLProject` with all the required pac
 - [`graphs.py`](graphs.py): file containing the functions used for the visualization of the models results, such as the learning curves or parameter influence
 - [`importance.py`](importance.py): file containing the functions used for the feature importance analysis, such as the permutation importance
 - [`MLProject.yml`](MLProject.yml): conda environment file
-- [`reproducibility.py`](reproducibility.py): file that must be run to check reproducibility of the results
+- [`report.pdf`](report.pdf): report of the project, showing the different steps of the project and the results
+- [`reproducibility.py`](reproducibility.py): file that must be run to check reproducibility of the results of the 2 selected submissions on kaggle
 - [`research_of_features.py`](research_of_features.py): file containing the functions used for the features analysis, such as the correlation between features and the selection of the best features
 - [`tools.py`](tools.py): file containing the helper function, such as the data loader `selectFeatures()` and the saving function `saveSubmission()`. These helped to select quickly the features (between ECFP, cddd, etc.) and save the submission files to the correct format for the kaggle competition.
 
@@ -104,6 +107,8 @@ The performance of the predictions is evaluated using the root mean squared erro
 | Neural Networl - Keras | 0.18831 |
 
 Further details on the results can be found on the Kaggle competition page: https://www.kaggle.com/competitions/epfl-bio322-2023/leaderboard
+
+More details on the project and the process used can be found in the [`report.pdf`](report.pdf) file.
 
 ## Acknowledgements
 We would like to thank our professor and teaching assistants for their guidance and support throughout this project. 
