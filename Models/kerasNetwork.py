@@ -21,6 +21,45 @@ from tools import selectFeatures, getTarget, saveSubmission
 
 
 def kerasNetwork(X_set, X_test, y_set, model_structure = None, seed_num=1, batch_size=128, epochs=1000, lr=0.0016, decay=0.004, patience=150, verbose=True, export=False, name="NeuralNetwork"):
+    """
+    Builds, trains, and evaluates a Keras neural network.
+    Note : Parameter unpacking can be used (*) to pass training and test sets to the function. As selectFeatures retuns a tuple (X_set, X_test), *selectFeatures returns X_set, X_test
+
+    Parameters
+    ----------
+    X_set : pandas.DataFrame or numpy.ndarray
+        The training features.
+    X_test : pandas.DataFrame or numpy.ndarray
+        The test features.
+    y_set : pandas.Series or numpy.ndarray
+        The training targets.
+    model_structure : list, optional
+        The structure of the model as a list of Keras layers. If None, a default structure is used.
+    seed_num : int, optional
+        The seed for random number generation, for reproducibility.
+    batch_size : int, optional
+        The batch size for training.
+    epochs : int, optional
+        The number of epochs to train for.
+    lr : float, optional
+        The learning rate for the AdamW optimizer.
+    decay : float, optional
+        The decay rate for the AdamW optimizer.
+    patience : int, optional
+        The number of epochs with no improvement after which training will be stopped.
+    verbose : bool, optional
+        Whether to print verbose messages during training.
+    export : bool, optional
+        Whether to export the final predictions.
+    name : str, optional
+        The name of the model, used when exporting the predictions under the folder "Submissions/KerasNetwork".
+
+    Returns
+    -------
+    tuple
+        A tuple containing the trained model, the training history, the validation loss and predictions for the test set.
+    """
+    
     # Reproducibility
     keras.utils.set_random_seed(seed_num)
 
@@ -99,103 +138,4 @@ def kerasNetwork(X_set, X_test, y_set, model_structure = None, seed_num=1, batch
     if export:
         saveSubmission(y_pred, f'KerasNetworks/{name}')
 
-    return model, history, val_loss,
-
-
-
-# Uses parameter unpacking (*) to pass training and test sets to the function
-# As selectFeatures retuns a tuple (X_set, X_test), *selectFeatures returns X_set, X_test
-
-
-############# Confirmed reproducibility #############
-
-# Best model yet (Validation loss: 0.16014881432056427)
-kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestCddd=100), getTarget(), batch_size=70, name="cddd_little_batch")
-
-# Second best model (Validation loss: 0.18084)
-# kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestCddd=100), getTarget(), batch_size=128, name="cddd_100")
-
-
-
-
-def bestMolGraph():
-    # Graphing effect of bestMol on validation loss
-    bestMol = 0
-    bestValLoss = 100
-    val_losses = []
-    mols = list(range(1, 211, 10))
-
-    for i in tqdm(mols):
-        model, history, val_loss = kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestMol=i, bestCddd=100), getTarget(), batch_size=128, verbose=False)
-        val_losses.append(val_loss)
-        if val_loss < bestValLoss:
-            bestValLoss = val_loss
-            bestMol = i
-            print(f"Best number of molecular features: {bestMol}, Validation loss: {bestValLoss}")
-
-    print(f"Best number of molecular features: {bestMol}, Validation loss: {bestValLoss}")
-
-    # Plotting the validation losses
-    plt.figure(figsize=(10, 6))
-    plt.plot(mols, val_losses, marker='o')
-    plt.title('Validation loss vs Number of molecular features')
-    plt.xlabel('Number of molecular features')
-    plt.ylabel('Validation loss')
-    plt.grid(True)
-    plt.show()
-
-
-def bestCdddGraph():
-    # Graphing effect of bestCddd on validation loss
-    bestCddd = 0
-    bestValLoss = 100
-    val_losses = []
-    cddds = list(range(10, 251, 10))
-
-    for i in tqdm(cddds):
-        model, history, val_loss = kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestCddd=i), getTarget(), name=i, batch_size=128, verbose=False,)
-        val_losses.append(val_loss)
-        if val_loss < bestValLoss:
-            bestValLoss = val_loss
-            bestCddd = i
-            print(f"Best number of CDDD features: {bestCddd}, Validation loss: {bestValLoss}")
-
-    print(f"Best number of CDDD features: {bestCddd}, Validation loss: {bestValLoss}")
-
-    # Plotting the validation losses
-    plt.figure(figsize=(10, 6))
-    plt.plot(cddds, val_losses, marker='o')
-    plt.title('Validation loss vs Number of CDDD features')
-    plt.xlabel('Number of CDDD features')
-    plt.ylabel('Validation loss')
-    plt.grid(True)
-    plt.show()
-    
-    
-# Graph the effect of patience on validation loss
-def patienceGraph():
-    bestPatience = 0
-    bestValLoss = 100
-    val_losses = []
-    patiences = list(range(10, 501, 50))
-
-    for i in tqdm(patiences):
-        model, history, val_loss = kerasNetwork(*selectFeatures(Lab = True, mol = True, cddd=True, bestCddd=100), getTarget(), batch_size=128, patience=i, verbose=False)
-        val_losses.append(val_loss)
-        if val_loss < bestValLoss:
-            bestValLoss = val_loss
-            bestPatience = i
-            print(f"Best patience: {bestPatience}, Validation loss: {bestValLoss}")
-
-    print(f"Best patience: {bestPatience}, Validation loss: {bestValLoss}")
-
-    # Plotting the validation losses
-    plt.figure(figsize=(10, 6))
-    plt.plot(patiences, val_losses, marker='o')
-    plt.title('Validation loss vs Patience')
-    plt.xlabel('Patience')
-    plt.ylabel('Validation loss')
-    plt.grid(True)
-    plt.show()
-    
-    
+    return model, history, val_loss, y_pred
