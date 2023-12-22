@@ -94,7 +94,7 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
 
     # Setting up the model
     class NeuralNet(torch.nn.Module):
-        def __init__(self, input_size=334):  # Set default input size to 334
+        def __init__(self, input_size):
             super(NeuralNet, self).__init__()
             self.layers = torch.nn.Sequential(
                 torch.nn.Linear(input_size, 416),  # Use input_size here
@@ -116,7 +116,7 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
     patience_counter = 0
     history = {'train_loss': [], 'val_loss': []}
 
-    model = NeuralNet()
+    model = NeuralNet(X_set.shape[1])
     loss_func = torch.nn.HuberLoss() 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
 
