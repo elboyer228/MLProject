@@ -190,11 +190,11 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
 
 
 
-X_set, X_test = selectFeatures(Lab=True, mol=True, cddd=True, ECFP=False, bestCddd=100) 
-y_set = getTarget()
+# X_set, X_test = selectFeatures(Lab=True, mol=True, cddd=True, ECFP=False, bestCddd=100) 
+# y_set = getTarget()
 
-train_loss, val_loss = neuralNetworks(X_set, X_test, y_set, seed_num=1, batch_size=128, epochs=1500, lr=0.00023, patience=150, plotHistory = False, verbose=False, export=False, name="NeuralNetwork_LabMol")
-print(f"Train loss : {train_loss}, Validation loss: {val_loss}")
+# train_loss, val_loss = neuralNetworks(X_set, X_test, y_set, seed_num=1, batch_size=128, epochs=1500, lr=0.00023, patience=150, plotHistory = False, verbose=False, export=False, name="NeuralNetwork_LabMol")
+# print(f"Train loss : {train_loss}, Validation loss: {val_loss}")
 
 # These settings gave the best results: R^2 score for validation set: 0.9868045981517677
 # Train loss : 0.0007032371941022575, Validation loss: 0.08734024316072464
