@@ -206,26 +206,8 @@ def neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=150,
 X_set, X_test = selectFeatures(Lab=True, mol=True) 
 y_set = getTarget()
 
-history, train_losses, val_losses = neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=1500, lr=0.00023, patience=50, verbose=False, export=False, name="NeuralNetwork_LabMol_CV")
+history, train_losses, val_losses = neuralNetworks(X_set, X_test, y_set, seed_num=1, batch_size=128, epochs=1500, lr=0.00023, patience=50, verbose=False, export=False, name="NeuralNetwork_LabMol_CV")
 
 print(f"Average train loss unstanderdize : {sum(train_losses) / len(train_losses)}")
 print(f"Average validation loss unstandardize : {sum(val_losses) / len(val_losses)}")
-
-# Plot different learning rates
-def plotLR():
-    learning_rates = np.linspace(0.00001, 0.001, 10)
-    train_losses = []
-    validation_losses = []
-    for lr in learning_rates:
-        train_loss, validation_loss = neuralNetworks(X_set, X_test, y_set, seed_num=2, batch_size=128, epochs=1500, lr=lr, patience=50, verbose=False, export=False, name="NeuralNetwork")
-        train_losses.append(train_loss)
-        validation_losses.append(validation_loss)
-        print(f"Learning rate: {lr}, Train loss : {train_losses[-1]}, Validation loss: {validation_losses[-1]}")
-        
-    plt.plot(learning_rates, validation_losses)
-    plt.xlabel("Learning rate")
-    plt.ylabel("Validation loss")
-    plt.xscale("log")
-    plt.show()
-
 
