@@ -12,7 +12,10 @@ from keras import layers
 from keras_tuner import RandomSearch
 from keras_tuner import BayesianOptimization
 from keras.callbacks import EarlyStopping
+from keras.callbacks import ReduceLROnPlateau
 from keras.losses import mean_squared_error
+from keras import regularizers
+from keras.layers import BatchNormalization, Activation
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -25,10 +28,10 @@ from tools import selectFeatures, getTarget, saveSubmission
 seed_num = 1
 keras.utils.set_random_seed(seed_num)
 
-project_name = 'cddd_bayesian_full'
+project_name = 'repro'
 
 
-X_set, X_test = selectFeatures(Lab=True, mol=True, cddd=True, bestCddd=250)
+X_set, X_test = selectFeatures(Lab=True, mol=True, cddd=True, bestCddd=100)
 y_set = getTarget()
 
 # Splitting test and train
@@ -54,12 +57,11 @@ y_val_std = Yscaler.transform(y_val.values.reshape(-1, 1))
 def build_model_tunned(hp):
     model = keras.Sequential()
     model.add(keras.Input(shape=X_set.shape[1]))
-    for i in range(hp.Int('num_layers', 2, 10)):
+    for i in range(hp.Int('num_layers', 5, 10)):
         model.add(layers.Dense(units=hp.Int('units_' + str(i),
                                             min_value=128,
                                             max_value=1024,
-                                            step=32),
-                               activation='relu'))
+                                            step=32), activation='relu'))
     model.add(layers.Dense(1))
     
     
@@ -92,6 +94,9 @@ tuner.search(X_std, y_std,
 best_model = tuner.get_best_models(num_models=1)[0]
 best_model.summary()
 
+# Retrieve parameters only
+best_hyperparameters = tuner.get_best_hyperparameters(num_trials=1)[0]
+print(best_hyperparameters.values)
 
 best_model.fit(X_std, y_std, epochs=1000, batch_size=70 ,validation_data=(X_val_std, y_val_std), callbacks=[EarlyStopping(monitor='val_loss', patience=150, restore_best_weights=True)])
 
@@ -116,4 +121,8 @@ y_pred = Yscaler.inverse_transform(y_pred).reshape(-1)
 
 # # Transforming to array and saving
 y_pred = np.array(y_pred)
-saveSubmission(y_pred, 'KerasNetworks/'+project_name)
+saveSubmission(y_pred, "export#1")
+
+
+
+
